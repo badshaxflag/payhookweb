@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>PayHook অ্যাডমিন</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anek+Bangla:wght@500;800&family=Hind+Siliguri:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{--ledger:#173a31;--ledger-2:#10291f;--paper:#ecefe4;--ink:#10231d;--muted:#4d6159;--stamp:#2a3fbf;--brass:#c9a24b;--void:#a8362a;--ok:#1f6b45;
+--head:'Anek Bangla',sans-serif;--body:'Hind Siliguri',sans-serif;--mono:'IBM Plex Mono',monospace}
+*{box-sizing:border-box;margin:0}
+body{background:var(--ledger);color:var(--paper);font:400 16px/1.6 var(--body);min-height:100vh}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:50;opacity:.16;mix-blend-mode:multiply;
+background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .9 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+:focus-visible{outline:3px solid var(--brass);outline-offset:2px}
+.wrap{width:min(960px,100% - 28px);margin-inline:auto}
+header{background:var(--ledger-2);border-bottom:1px solid #ffffff1a;position:sticky;top:0;z-index:20}
+.bar{display:flex;align-items:center;justify-content:space-between;height:56px;gap:10px}
+.mark{font:800 22px var(--head)}.mark i{font-style:normal;color:var(--brass)}
+.tabs{display:flex;gap:4px;overflow-x:auto;padding-bottom:10px;scrollbar-width:none}
+.tabs button{flex:none;background:transparent;border:0;color:var(--paper);font:600 16px var(--body);padding:8px 14px;border-radius:3px;cursor:pointer;opacity:.75}
+.tabs button[aria-current=true]{background:var(--paper);color:var(--ink);opacity:1}
+.btn{font:600 15px var(--body);border:0;cursor:pointer;padding:8px 14px;border-radius:3px;background:var(--brass);color:var(--ink)}
+.btn.dark{background:var(--ink);color:var(--paper)}.btn.ok{background:var(--ok);color:#fff}.btn.bad{background:var(--void);color:#fff}
+.btn.ghost{background:transparent;color:inherit;box-shadow:inset 0 0 0 1.5px currentColor}
+.btn[disabled]{opacity:.5;cursor:wait}
+main{padding:22px 0 80px}
+h2{font:800 28px/1.2 var(--head);margin-bottom:14px}
+.card{background:var(--paper);color:var(--ink);padding:16px 18px;margin-bottom:12px;border-radius:3px;box-shadow:0 6px 16px #0006}
+.top{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;margin-bottom:4px}
+.mono{font-family:var(--mono);font-size:15px;word-break:break-all}
+.muted{color:var(--muted);font-size:14px}
+.badge{font:600 13px var(--body);padding:2px 9px;border-radius:99px;color:#fff;background:var(--muted)}
+.badge.matched{background:var(--ok)}.badge.mismatch{background:var(--void)}.badge.none{background:#7a6a2a}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:center}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.filters .btn{background:transparent;color:var(--paper);box-shadow:inset 0 0 0 1.5px #ecefe466}
+.filters .btn[aria-pressed=true]{background:var(--paper);color:var(--ink)}
+input,select{font:500 15px var(--mono);padding:8px 10px;border:1.5px solid var(--ink);background:#fff9;color:var(--ink);border-radius:2px;min-width:0}
+label.f{display:flex;flex-direction:column;gap:2px;font-size:13px;font-weight:600}
+button.key{display:block;width:100%;text-align:left;cursor:pointer;background:#10231d0f;border:1.5px dashed var(--ink);color:var(--ink);padding:8px 10px;border-radius:3px;font:500 18px var(--mono);letter-spacing:1px;margin:6px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}
+.empty{padding:24px;border:2px dashed #ecefe455}
+.center{min-height:70vh;display:grid;place-content:center;text-align:center;gap:16px;padding:20px}
+#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:11px 18px;border-radius:3px;z-index:60;max-width:90%;font-weight:600;box-shadow:0 6px 20px #000a}
+#toast.bad{background:var(--void)}
+.hide{display:none!important}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <div class="bar"><span class="mark">Pay<i>Hook</i> অ্যাডমিন</span><button class="btn ghost hide" id="out">বের হোন</button></div>
+  <nav class="tabs hide" id="tabs" aria-label="বিভাগ"></nav>
+</div></header>
+<main><div class="wrap" id="view"></div></main>
+<div id="toast" class="hide" role="status"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+const SB='https://kzgfugomdgrimrnobeej.supabase.co', KEY='sb_publishable_2sd0wUHy6yBNX27oN60vRw_VBn0hxtD';
+const sb=supabase.createClient(SB,KEY);
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=s=>s?new Date(s).toLocaleString('bn-BD',{dateStyle:'medium',timeStyle:'short'}):'—';
+const taka=n=>'৳ '+Number(n).toLocaleString('bn-BD');
+const TABS=[['orders','অর্ডার'],['users','ইউজার'],['keys','Key'],['plans','প্ল্যান'],['sms','SMS'],['settings','সেটিংস']];
+let session=null, tab='orders', f={orders:'pending',sms:'all'};
+
+async function adm(action,body={}){
+  const r=await fetch(SB+'/functions/v1/ph-admin',{method:'POST',headers:{'Content-Type':'application/json',apikey:KEY,Authorization:'Bearer '+session.access_token},body:JSON.stringify({action,...body})});
+  const j=await r.json().catch(()=>({}));
+  if(!r.ok){const e=new Error(j.detail||'সমস্যা হয়েছে');e.code=r.status;throw e}
+  return j;
+}
+let tt; function toast(m,bad){const t=$('toast');t.textContent=m;t.className=bad?'bad':'';clearTimeout(tt);tt=setTimeout(()=>t.className='hide',3200)}
+async function copyText(v){try{await navigator.clipboard.writeText(v);return true}catch(e){const t=document.createElement('textarea');t.value=v;t.style.cssText='position:fixed;opacity:0';document.body.appendChild(t);t.select();let ok=false;try{ok=document.execCommand('copy')}catch(e){}t.remove();return ok}}
+function ks(k){
+  if(!k.active) return 'বন্ধ';
+  if(k.lifetime) return 'লাইফটাইম';
+  if(!k.activated_at) return 'শুরু হয়নি ('+k.days+' দিন)';
+  const l=Math.ceil((new Date(k.expires_at)-Date.now())/864e5);
+  return l>0?l+' দিন বাকি ('+fmt(k.expires_at)+')':'মেয়াদ শেষ';
+}
+const MATCH={matched:'SMS মিলেছে',mismatch:'SMS আছে, টাকা মেলেনি',none:'SMS পাওয়া যায়নি'};
+
+/* ---------- views ---------- */
+async function vOrders(){
+  const {orders}=await adm('list_orders',{status:f.orders==='all'?undefined:f.orders,limit:100});
+  const fl=['pending:অপেক্ষায়','approved:অনুমোদিত','rejected:বাতিল','all:সব'].map(x=>{const[a,b]=x.split(':');return `<button class="btn" data-act="of" data-v="${a}" aria-pressed="${f.orders===a}">${b}</button>`}).join('');
+  return `<h2>অর্ডার</h2><div class="filters">${fl}</div>`+(orders.length?orders.map(o=>`<div class="card">
+    <div class="top"><b>${esc(o.plan_name)}</b><span class="mono">${taka(o.price)}</span><span class="badge ${o.match}">${MATCH[o.match]}</span></div>
+    <div class="mono">${esc(o.trx_id)}</div>
+    <div>${esc(o.pay_method)} থেকে ${esc(o.sender_number||'—')}${o.sms?` · SMS-এ ${taka(o.sms.amount)}${o.sms.used?' (আগেই ব্যবহার হয়েছে)':''}`:''}</div>
+    <div class="muted">${esc(o.email)} · ${fmt(o.created_at)}</div>
+    ${o.status==='pending'?`<div class="row"><input id="n-${o.id}" placeholder="নোট (ঐচ্ছিক)" maxlength="200" style="flex:1;min-width:140px">
+      <button class="btn ok" data-act="approve" data-id="${o.id}" data-match="${o.match}">অনুমোদন</button>
+      <button class="btn bad" data-act="reject" data-id="${o.id}">বাতিল</button></div>`
+    :`<div class="row"><span class="badge ${o.status==='approved'?'matched':'mismatch'}">${o.status==='approved'?'অনুমোদিত':'বাতিল'}</span><span class="muted">${esc(o.admin_note||'')} ${o.reviewed_at?fmt(o.reviewed_at):''}</span></div>`}
+  </div>`).join(''):'<div class="empty">এই তালিকায় কোনো অর্ডার নেই।</div>');
+}
+async function vKeys(){
+  const {keys}=await adm('list_keys');
+  return `<h2>Key</h2><div class="card"><b>নতুন key</b><div class="row">
+    <label class="f">নাম<input id="nk-label" maxlength="80" placeholder="যেমন: রহিম"></label>
+    <label class="f">দিন<input id="nk-days" type="number" min="1" max="3650" value="30" style="width:96px"></label>
+    <label class="f">লাইফটাইম<input id="nk-life" type="checkbox" style="width:24px;height:24px"></label>
+    <button class="btn dark" data-act="mkkey">তৈরি করুন</button></div></div>`
+  +(keys.length?keys.map(k=>`<div class="card"><div class="top"><b>${esc(k.label||'নামহীন')}</b><span class="badge ${k.active?'matched':'mismatch'}">${esc(ks(k))}</span></div>
+    <button class="key" data-act="copy" data-v="${esc(k.key)}">${esc(k.key)}</button>
+    <div class="muted">শেষ দেখা: ${fmt(k.last_seen)} ${k.device?'· '+esc(k.device):''}</div>
+    <div class="row">
+      <button class="btn" data-act="extend" data-id="${k.id}">দিন বাড়ান</button>
+      <button class="btn" data-act="life" data-id="${k.id}">লাইফটাইম</button>
+      <button class="btn" data-act="setdays" data-id="${k.id}">নতুন মেয়াদ</button>
+      <button class="btn ghost" data-act="toggle" data-id="${k.id}" data-v="${k.active?0:1}">${k.active?'বন্ধ করুন':'চালু করুন'}</button>
+      <button class="btn ghost" data-act="label" data-id="${k.id}">নাম বদলান</button>
+      <button class="btn bad" data-act="delkey" data-id="${k.id}">মুছুন</button></div></div>`).join(''):'<div class="empty">কোনো key নেই।</div>');
+}
+async function vUsers(){
+  const {users}=await adm('list_users');
+  return `<h2>ইউজার (${users.length})</h2>`+(users.length?users.map(u=>`<div class="card"><div class="top"><b>${esc(u.email)}</b></div>
+    <div class="muted">যোগ দিয়েছেন ${fmt(u.created_at)} · শেষ লগইন ${fmt(u.last_sign_in_at)}</div>
+    <div>অর্ডার: অপেক্ষায় ${u.orders.pending}, অনুমোদিত ${u.orders.approved}, বাতিল ${u.orders.rejected}</div>
+    ${u.keys.map(k=>`<div class="mono">${esc(k.key)} <span class="muted">${esc(ks(k))}</span></div>`).join('')||'<div class="muted">কোনো key নেই</div>'}</div>`).join(''):'<div class="empty">এখনো কেউ লগইন করেনি।</div>');
+}
+function planForm(p){
+  p=p||{id:'',name:'',days:30,price:'',sort:0,active:true,lifetime:false};
+  return `<div class="card" data-plan="${p.id}"><div class="grid">
+    <label class="f">নাম<input data-k="name" value="${esc(p.name)}" maxlength="60"></label>
+    <label class="f">দিন<input data-k="days" type="number" min="1" max="3650" value="${p.days??''}"></label>
+    <label class="f">দাম (৳)<input data-k="price" type="number" min="0" step="0.01" value="${esc(p.price)}"></label>
+    <label class="f">ক্রম<input data-k="sort" type="number" min="0" value="${p.sort}"></label>
+    <label class="f">চালু<input data-k="active" type="checkbox" ${p.active?'checked':''} style="width:24px;height:24px"></label>
+    <label class="f">লাইফটাইম<input data-k="lifetime" type="checkbox" ${p.lifetime?'checked':''} style="width:24px;height:24px"></label></div>
+    <div class="row"><button class="btn dark" data-act="saveplan">${p.id?'সেভ':'যোগ করুন'}</button>${p.id?`<button class="btn bad" data-act="delplan" data-id="${p.id}">মুছুন</button>`:''}</div></div>`;
+}
+async function vPlans(){
+  const {plans}=await adm('list_plans');
+  return `<h2>প্ল্যান</h2><p class="muted" style="color:#ecefe4cc;margin-bottom:12px">কাস্টম দিনের দাম সেটিংসের ধাপ থেকে আসে, এখানে দেখা যায় না।</p>`
+   +planForm()+plans.filter(p=>!p.custom).map(planForm).join('');
+}
+async function vSms(){
+  const {sms}=await adm('list_sms',{limit:100,direction:f.sms==='all'?undefined:f.sms});
+  const fl=['all:সব','in:এসেছে','out:গেছে'].map(x=>{const[a,b]=x.split(':');return `<button class="btn" data-act="sf" data-v="${a}" aria-pressed="${f.sms===a}">${b}</button>`}).join('');
+  return `<h2>SMS</h2><div class="filters">${fl}</div>`+(sms.length?sms.map(s=>`<div class="card"><div class="top"><b>${esc(s.sender)}</b><span class="mono">${s.amount!=null?taka(s.amount):'—'}</span><span class="badge">${esc(s.direction)}</span>${s.used?'<span class="badge matched">ব্যবহৃত</span>':''}</div>
+    <div class="mono">${esc(s.trx_id||'TrxID নেই')}</div><div class="muted">${fmt(s.received_at)}</div></div>`).join(''):'<div class="empty">কোনো SMS নেই।</div>');
+}
+const SET=[['bkash_number','bKash নম্বর'],['nagad_number','Nagad নম্বর'],['rocket_number','Rocket নম্বর'],['support_contact','যোগাযোগ (সাইটের নিচে দেখায়)'],['notice','সাইটের নোটিশ (প্ল্যানের ওপরে দেখায়)']];
+async function vSettings(){
+  const {settings}=await adm('get_settings');
+  return `<h2>সেটিংস</h2><div class="card" id="setbox">`+SET.map(([k,l])=>`<label class="f" style="margin-bottom:12px">${l}<input data-s="${k}" value="${esc(settings[k])}" maxlength="300" style="width:100%"></label>`).join('')
+   +`<button class="btn dark" data-act="saveset">সেভ করুন</button></div>`;
+}
+const VIEWS={orders:vOrders,keys:vKeys,users:vUsers,plans:vPlans,sms:vSms,settings:vSettings};
+
+async function render(){
+  $('tabs').innerHTML=TABS.map(([k,l])=>`<button data-act="tab" data-v="${k}" aria-current="${k===tab}">${l}</button>`).join('');
+  const v=$('view'); v.innerHTML='<div class="empty">লোড হচ্ছে…</div>';
+  try{v.innerHTML=await VIEWS[tab]()}catch(e){
+    if(e.code===401||e.code===403){showGate(e.message)} else v.innerHTML='<div class="empty">'+esc(e.message)+'</div>';
+  }
+}
+function showGate(msg){
+  $('tabs').classList.add('hide');
+  $('view').innerHTML=`<div class="center"><h2>${msg?esc(msg):'অ্যাডমিন লগইন'}</h2><div><button class="btn" id="gIn">Google দিয়ে ঢুকুন</button></div></div>`;
+  $('gIn').onclick=()=>sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:location.origin+location.pathname,queryParams:{prompt:'select_account'}}});
+}
+
+/* ---------- actions ---------- */
+const num=(q,def)=>{const v=prompt(q,def);if(v===null)return null;const n=parseInt(v,10);if(!Number.isInteger(n)||n<1){toast('সঠিক সংখ্যা দিন',true);return null}return n};
+async function run(fn,okMsg){try{await fn();if(okMsg)toast(okMsg);await render()}catch(e){toast(e.message,true)}}
+document.addEventListener('click',async ev=>{
+  const b=ev.target.closest('[data-act]'); if(!b) return;
+  const a=b.dataset.act, id=b.dataset.id, v=b.dataset.v;
+  if(a==='tab'){tab=v;return render()}
+  if(a==='of'){f.orders=v;return render()}
+  if(a==='sf'){f.sms=v;return render()}
+  if(a==='copy'){return toast(await copyText(v)?'key কপি হয়েছে':'কপি করা যায়নি',false)}
+  if(a==='approve'){
+    if(b.dataset.match!=='matched'&&!confirm('এই অর্ডারের TrxID/টাকা SMS-এর সাথে মেলেনি। তবু অনুমোদন দেবেন?')) return;
+    b.disabled=true;
+    return run(async()=>{const r=await adm('approve_order',{id,note:$('n-'+id).value});await copyText(r.key.key);},'অনুমোদিত। key কপি হয়েছে')}
+  if(a==='reject'){if(!confirm('অর্ডারটি বাতিল করবেন?'))return;return run(()=>adm('reject_order',{id,note:$('n-'+id).value}),'বাতিল হয়েছে')}
+  if(a==='mkkey'){
+    const life=$('nk-life').checked;
+    return run(async()=>{const r=await adm('create_key',{label:$('nk-label').value,days:+$('nk-days').value,lifetime:life});await copyText(r.key.key)},'key তৈরি হয়েছে ও কপি হয়েছে')}
+  if(a==='extend'){const n=num('কত দিন বাড়াবেন?','30');if(n)return run(()=>adm('extend',{id,days:n}),'মেয়াদ বেড়েছে')}
+  if(a==='setdays'){const n=num('আজ থেকে কত দিনের নতুন মেয়াদ?','30');if(n)return run(()=>adm('set_days',{id,days:n}),'নতুন মেয়াদ বসেছে')}
+  if(a==='life'){if(confirm('key-টা লাইফটাইম করবেন?'))return run(()=>adm('set_lifetime',{id}),'লাইফটাইম হয়েছে')}
+  if(a==='toggle')return run(()=>adm('set_active',{id,active:v==='1'}),v==='1'?'চালু হয়েছে':'বন্ধ হয়েছে');
+  if(a==='label'){const l=prompt('নতুন নাম');if(l!==null)return run(()=>adm('set_label',{id,label:l}),'নাম বদলেছে')}
+  if(a==='delkey'){if(confirm('key আর তার সব SMS চিরতরে মুছে যাবে। মুছবেন?'))return run(()=>adm('delete_key',{id}),'মুছে গেছে')}
+  if(a==='saveplan'){
+    const box=b.closest('[data-plan]'), g=k=>box.querySelector('[data-k="'+k+'"]'), pid=box.dataset.plan, life=g('lifetime').checked;
+    const body={name:g('name').value,lifetime:life,days:life?null:+g('days').value,price:+g('price').value,sort:+g('sort').value,active:g('active').checked};
+    if(pid) body.id=pid;
+    return run(()=>adm('save_plan',body),pid?'সেভ হয়েছে':'প্ল্যান যোগ হয়েছে')}
+  if(a==='delplan'){if(confirm('প্ল্যান মুছবেন?'))return run(()=>adm('delete_plan',{id}),'মুছে গেছে')}
+  if(a==='saveset'){
+    const values={};document.querySelectorAll('[data-s]').forEach(i=>values[i.dataset.s]=i.value);
+    return run(()=>adm('save_settings',{values}),'সেভ হয়েছে')}
+});
+$('out').onclick=async()=>{await sb.auth.signOut();location.reload()};
+
+(async function init(){
+  const {data}=await sb.auth.getSession(); session=data.session;
+  if(!session) return showGate('');
+  $('out').classList.remove('hide'); $('tabs').classList.remove('hide');
+  render();
+})();
+sb.auth.onAuthStateChange((ev,s)=>{if(ev==='TOKEN_REFRESHED'&&s) session=s});
+</script>
+</body>
+</html>
