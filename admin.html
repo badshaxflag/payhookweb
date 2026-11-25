@@ -84,6 +84,7 @@ function ks(k){
   const l=Math.ceil((new Date(k.expires_at)-Date.now())/864e5);
   return l>0?l+' দিন বাকি ('+fmt(k.expires_at)+')':'মেয়াদ শেষ';
 }
+function remDays(k){return k.activated_at&&k.expires_at?Math.max(0,Math.ceil((new Date(k.expires_at)-Date.now())/864e5)):Number(k.days||0)}
 const MATCH={matched:'SMS মিলেছে',mismatch:'SMS আছে, টাকা মেলেনি',none:'SMS পাওয়া যায়নি'};
 
 /* ---------- views ---------- */
@@ -106,15 +107,13 @@ async function vKeys(){
   return `<h2>Key</h2><div class="card"><b>নতুন key</b><div class="row">
     <label class="f">নাম<input id="nk-label" maxlength="80" placeholder="যেমন: রহিম"></label>
     <label class="f">দিন<input id="nk-days" type="number" min="1" max="3650" value="30" style="width:96px"></label>
-    <label class="f">লাইফটাইম<input id="nk-life" type="checkbox" style="width:24px;height:24px"></label>
     <button class="btn dark" data-act="mkkey">তৈরি করুন</button></div></div>`
   +(keys.length?keys.map(k=>`<div class="card"><div class="top"><b>${esc(k.label||'নামহীন')}</b><span class="badge ${k.active?'matched':'mismatch'}">${esc(ks(k))}</span></div>
     <button class="key" data-act="copy" data-v="${esc(k.key)}">${esc(k.key)}</button>
     <div class="muted">শেষ দেখা: ${fmt(k.last_seen)} ${k.device?'· '+esc(k.device):''}</div>
     <div class="row">
-      <button class="btn" data-act="extend" data-id="${k.id}">দিন বাড়ান</button>
-      <button class="btn" data-act="life" data-id="${k.id}">লাইফটাইম</button>
-      <button class="btn" data-act="setdays" data-id="${k.id}">নতুন মেয়াদ</button>
+      ${k.lifetime?`<button class="btn" data-act="unlife" data-id="${k.id}">লাইফটাইম বন্ধ করে দিন-ভিত্তিক করুন</button>`
+        :`<button class="btn dark" data-act="editdays" data-id="${k.id}" data-rem="${remDays(k)}" data-started="${k.activated_at?1:0}">✎ দিন এডিট (এখন ${remDays(k)} দিন বাকি)</button>`}
       <button class="btn ghost" data-act="toggle" data-id="${k.id}" data-v="${k.active?0:1}">${k.active?'বন্ধ করুন':'চালু করুন'}</button>
       <button class="btn ghost" data-act="label" data-id="${k.id}">নাম বদলান</button>
       <button class="btn bad" data-act="delkey" data-id="${k.id}">মুছুন</button></div></div>`).join(''):'<div class="empty">কোনো key নেই।</div>');
@@ -134,7 +133,7 @@ function planForm(p){
     <label class="f">দাম (৳)<input data-k="price" type="number" min="0" step="0.01" value="${esc(p.price)}"></label>
     <label class="f">ক্রম<input data-k="sort" type="number" min="0" value="${p.sort}"></label>
     <label class="f">চালু<input data-k="active" type="checkbox" ${p.active?'checked':''} style="width:24px;height:24px"></label>
-    <label class="f">লাইফটাইম<input data-k="lifetime" type="checkbox" ${p.lifetime?'checked':''} style="width:24px;height:24px"></label></div>
+    ${p.lifetime?'<label class="f">লাইফটাইম<input data-k="lifetime" type="checkbox" checked style="width:24px;height:24px"></label>':''}</div>
     <div class="row"><button class="btn dark" data-act="saveplan">${p.id?'সেভ':'যোগ করুন'}</button>${p.id?`<button class="btn bad" data-act="delplan" data-id="${p.id}">মুছুন</button>`:''}</div></div>`;
 }
 async function vPlans(){
@@ -185,16 +184,24 @@ document.addEventListener('click',async ev=>{
     return run(async()=>{const r=await adm('approve_order',{id,note:$('n-'+id).value});await copyText(r.key.key);},'অনুমোদিত। key কপি হয়েছে')}
   if(a==='reject'){if(!confirm('অর্ডারটি বাতিল করবেন?'))return;return run(()=>adm('reject_order',{id,note:$('n-'+id).value}),'বাতিল হয়েছে')}
   if(a==='mkkey'){
-    const life=$('nk-life').checked;
+    const life=false;
     return run(async()=>{const r=await adm('create_key',{label:$('nk-label').value,days:+$('nk-days').value,lifetime:life});await copyText(r.key.key)},'key তৈরি হয়েছে ও কপি হয়েছে')}
-  if(a==='extend'){const n=num('কত দিন বাড়াবেন?','30');if(n)return run(()=>adm('extend',{id,days:n}),'মেয়াদ বেড়েছে')}
-  if(a==='setdays'){const n=num('আজ থেকে কত দিনের নতুন মেয়াদ?','30');if(n)return run(()=>adm('set_days',{id,days:n}),'নতুন মেয়াদ বসেছে')}
+  if(a==='extend'){const n=num('এখনকার মেয়াদের সাথে আরও কত দিন যোগ হবে? (বাকি দিন নষ্ট হবে না)','30');if(n)return run(()=>adm('extend',{id,days:n}),'মেয়াদ বেড়েছে')}
+  if(a==='setdays'){const n=num('আগের মেয়াদ বাদ দিয়ে আজ থেকে কত দিন চলবে?','30');if(n)return run(()=>adm('set_days',{id,days:n}),'নতুন মেয়াদ বসেছে')}
+  if(a==='unlife'){const n=num('লাইফটাইম বন্ধ হবে। আজ থেকে কত দিন চলবে?','30');if(n)return run(()=>adm('set_days',{id,days:n}),'লাইফটাইম বন্ধ, '+n+' দিনের মেয়াদ বসেছে')}
+  if(a==='editdays'){
+    const rem=+b.dataset.rem, started=b.dataset.started==='1';
+    const n=num('এই key-তে এখন '+rem+' দিন বাকি'+(started?'':' (এখনো চালু হয়নি)')+'।\nনতুন মোট কত দিন বাকি থাকবে? সংখ্যাটা বদলে দিন।',String(rem));
+    if(n===null||n===rem) return;
+    if(started) return run(()=>adm('set_days',{id,days:n}),'এখন '+n+' দিন বাকি');
+    if(n>rem) return run(()=>adm('extend',{id,days:n-rem}),'এখন '+n+' দিন');
+    return toast('চালু হয়নি এমন key-তে দিন কমানো যায় না, শুধু বাড়ানো যায়',true)}
   if(a==='life'){if(confirm('key-টা লাইফটাইম করবেন?'))return run(()=>adm('set_lifetime',{id}),'লাইফটাইম হয়েছে')}
   if(a==='toggle')return run(()=>adm('set_active',{id,active:v==='1'}),v==='1'?'চালু হয়েছে':'বন্ধ হয়েছে');
   if(a==='label'){const l=prompt('নতুন নাম');if(l!==null)return run(()=>adm('set_label',{id,label:l}),'নাম বদলেছে')}
   if(a==='delkey'){if(confirm('key আর তার সব SMS চিরতরে মুছে যাবে। মুছবেন?'))return run(()=>adm('delete_key',{id}),'মুছে গেছে')}
   if(a==='saveplan'){
-    const box=b.closest('[data-plan]'), g=k=>box.querySelector('[data-k="'+k+'"]'), pid=box.dataset.plan, life=g('lifetime').checked;
+    const box=b.closest('[data-plan]'), g=k=>box.querySelector('[data-k="'+k+'"]'), pid=box.dataset.plan, life=g('lifetime')?g('lifetime').checked:false;
     const body={name:g('name').value,lifetime:life,days:life?null:+g('days').value,price:+g('price').value,sort:+g('sort').value,active:g('active').checked};
     if(pid) body.id=pid;
     return run(()=>adm('save_plan',body),pid?'সেভ হয়েছে':'প্ল্যান যোগ হয়েছে')}

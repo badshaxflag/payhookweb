@@ -141,6 +141,7 @@ button.keybox:hover{background:#10231d1f}
 <section id="plans"><div class="wrap">
   <h2>প্ল্যান</h2>
   <p class="sub" id="notice">মেয়াদ শুরু হয় আপনি প্রথমবার অ্যাপে ঢোকার মুহূর্ত থেকে।</p>
+  <p id="loginHint" data-dyn style="color:#ecefe4cc;margin-bottom:16px"></p>
   <div class="plans" id="planList" data-dyn></div>
 </div></section>
 
@@ -164,13 +165,14 @@ button.keybox:hover{background:#10231d1f}
 <footer><div class="wrap"><span id="contact" data-dyn></span> PayHook ব্যাংক বা পেমেন্ট গেটওয়ে নয়।</div></footer>
 
 <dialog id="orderDlg"><div class="slip">
-  <h3 id="dlgTitle" data-dyn></h3><small id="dlgPrice" data-dyn></small>
-  <label for="method">কোন মাধ্যমে টাকা পাঠিয়েছেন</label>
-  <select id="method"><option value="bkash">bKash</option><option value="nagad">Nagad</option><option value="rocket">Rocket</option></select>
-  <p id="payTo" data-dyn style="margin-top:10px"></p>
-  <label for="sender">যে নম্বর থেকে পাঠিয়েছেন</label><input id="sender" inputmode="numeric" placeholder="01XXXXXXXXX" autocomplete="tel">
-  <label for="trx">TrxID</label><input id="trx" placeholder="CK7M2X91QA" autocapitalize="characters" autocomplete="off">
-  <div class="row" style="margin-top:18px"><button class="btn dark" id="sendOrder">অর্ডার জমা দিন</button><button class="btn ghost" style="color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--ink)" id="closeDlg">বন্ধ করুন</button></div>
+  <h3 id="dlgTitle" data-dyn></h3><small id="dlgPrice" data-dyn style="font-size:18px;font-weight:700"></small>
+  <label id="l1" data-dyn></label>
+  <div id="mBtns" data-dyn style="display:flex;gap:8px;flex-wrap:wrap"></div>
+  <select id="method" style="display:none"><option value="bkash">bKash</option><option value="nagad">Nagad</option><option value="rocket">Rocket</option></select>
+  <div id="payTo" data-dyn style="margin-top:12px"></div>
+  <label id="l3" for="sender" data-dyn></label><input id="sender" inputmode="numeric" placeholder="01XXXXXXXXX" autocomplete="tel"><small id="hSender" data-dyn class="hint"></small>
+  <label id="l4" for="trx" data-dyn></label><input id="trx" placeholder="CK7M2X91QA" autocapitalize="characters" autocomplete="off"><small id="hTrx" data-dyn class="hint"></small>
+  <div class="row" style="margin-top:18px"><button class="btn dark" id="sendOrder" data-dyn></button><button class="btn ghost" style="color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--ink)" id="closeDlg" data-dyn></button></div>
   <div class="msg" id="dlgMsg" data-dyn role="status"></div>
 </div></dialog>
 
@@ -228,6 +230,7 @@ function applyStatic(){
   $('langBtn').setAttribute('aria-label',L('Switch to Bengali','ইংরেজিতে দেখুন'));
   document.querySelector('.slip[aria-label]').setAttribute('aria-label',L('Sample receipt','নমুনা রসিদ'));
   $('logoutBtn').textContent=L('Sign out','বের হোন');
+  document.querySelectorAll('.step .n').forEach((e,i)=>e.textContent=lang==='bn'?'১২৩'[i]:String(i+1));
 }
 $('langBtn').onclick=()=>{lang=lang==='en'?'bn':'en';try{localStorage.setItem('ph_lang',lang)}catch(e){}
   applyStatic();renderPlans();renderAccount();if($('orderDlg').open){fillDlg()}};
@@ -246,39 +249,80 @@ $('logoutBtn').onclick=async()=>{await sb.auth.signOut();location.hash='';locati
 
 function renderPlans(){
   const el=$('planList'), s=info.settings;
+  setHint();
   if(s.notice) $('notice').textContent=s.notice;
   $('contact').textContent=s.support_contact?(L('Contact: ','যোগাযোগ: ')+s.support_contact+(lang==='bn'?'।':'.')):'';
-  if(!info.plans.length){el.innerHTML='<div class="empty">'+L('No plans have been added yet. Please check back soon.','প্ল্যান এখনো যোগ করা হয়নি। একটু পরে আবার দেখুন।')+'</div>';return}
+  if(!info.plans.length){el.innerHTML=customCard()+'<div class="empty">'+L('No plans have been added yet. Please check back soon.','প্ল্যান এখনো যোগ করা হয়নি। একটু পরে আবার দেখুন।')+'</div>';bindCustom();return}
   el.innerHTML=info.plans.map(p=>`<div class="slip plan"><h3>${esc(p.name)}</h3>
     <div class="price">৳ ${num(p.price)}</div><div class="dur">${p.lifetime?L('Lifetime','লাইফটাইম'):num(p.days)+L(' days',' দিন')}</div>
-    <button class="btn dark" data-id="${esc(p.id)}">${L('Order now','অর্ডার করুন')}</button></div>`).join('');
-  el.querySelectorAll('button').forEach(b=>b.onclick=()=>openOrder(b.dataset.id));
+    <button class="btn dark" data-id="${esc(p.id)}">${L('Order now','অর্ডার করুন')}</button></div>`).join('')+customCard();
+  el.querySelectorAll('button[data-id]').forEach(b=>b.onclick=()=>openOrder(b.dataset.id));
+  bindCustom();
 }
-function fillDlg(){
-  $('dlgTitle').textContent=chosen.name;
-  $('dlgPrice').textContent=L('Send ৳ '+num(chosen.price),'৳ '+num(chosen.price)+' পাঠাতে হবে');
-  showPayTo();
-}
-function openOrder(id){
-  if(!session){login();return}
-  chosen=info.plans.find(p=>p.id===id); if(!chosen) return;
-  $('dlgMsg').textContent='';$('dlgMsg').className='msg';
+const TIERS=()=>info.custom_pricing||[[30,1.2],[90,1],[365,0.9],[3650,0.8]];
+function cPrice(n){const t=TIERS();let tot=0,prev=0;for(const [u,r] of t){if(n<=prev)break;tot+=(Math.min(n,u)-prev)*r;prev=u}if(n>prev)tot+=(n-prev)*t[t.length-1][1];return Math.round(tot*100)/100}
+function customCard(){return `<div class="slip plan"><h3>${L('Custom days','নিজের পছন্দের দিন')}</h3>
+  <input id="cDays" type="number" inputmode="numeric" min="1" max="3650" value="45" style="text-align:center">
+  <div class="price" id="cPrice">৳ ${num(cPrice(45))}</div><div class="dur" id="cDur">${num(45)}${L(' days',' দিন')}</div>
+  <button class="btn dark" id="cOrder">${L('Order now','অর্ডার করুন')}</button></div>`}
+const D=t=>String(t??'').replace(/[০-৯]/g,c=>'০১২৩৪৫৬৭৮৯'.indexOf(c));
+const PEND='ph_pending', NM={bkash:'bKash',nagad:'Nagad',rocket:'Rocket'};
+const methods=()=>['bkash','nagad','rocket'].filter(m=>info.settings[m+'_number']);
+function setHint(){$('loginHint').textContent=session?'':L('You need to sign in with Google to order. It takes one tap.','অর্ডার করতে Google দিয়ে লগইন করতে হবে, এক ট্যাপেই হয়ে যায়।')}
+function startOrder(o){
+  if(!session){try{sessionStorage.setItem(PEND,JSON.stringify(o))}catch(e){} login();return}
+  if(o.custom_days) chosen={id:null,price:cPrice(o.custom_days),custom_days:o.custom_days};
+  else{chosen=info.plans.find(p=>p.id===o.plan_id); if(!chosen) return}
+  $('dlgMsg').textContent='';$('dlgMsg').className='msg';$('sendOrder').disabled=false;
   fillDlg(); $('orderDlg').showModal();
 }
-function showPayTo(){
-  const m=$('method').value, n=info.settings[m+'_number'], nm={bkash:'bKash',nagad:'Nagad',rocket:'Rocket'}[m];
-  $('payTo').textContent=n?L('Send Money to this '+nm+' number: '+n,'টাকা পাঠান এই '+nm+' নম্বরে (Send Money): '+n):'';
+const openOrder=id=>startOrder({plan_id:id});
+function bindCustom(){
+  const i=$('cDays'); if(!i) return;
+  const val=()=>{const n=parseInt(D(i.value),10);return Number.isInteger(n)&&n>=1&&n<=3650?n:null};
+  i.oninput=()=>{const n=val();$('cPrice').textContent=n?'৳ '+num(cPrice(n)):'—';$('cDur').textContent=n?num(n)+L(' days',' দিন'):L('Enter 1 to 3650 days','১ থেকে ৩৬৫০ দিন দিন')};
+  $('cOrder').onclick=()=>{const n=val(); if(!n){i.focus();return} startOrder({custom_days:n})};
 }
-$('method').onchange=showPayTo;
+function fillDlg(){
+  const ms=methods(), cur=()=>$('method').value;
+  $('dlgTitle').textContent=chosen.custom_days?L('Custom '+chosen.custom_days+' days','কাস্টম '+num(chosen.custom_days)+' দিন'):chosen.name;
+  $('dlgPrice').textContent=L('Total to send: ৳ '+num(chosen.price),'মোট পাঠাতে হবে: ৳ '+num(chosen.price));
+  $('l1').textContent=L('Step 1: Choose how you will pay','ধাপ ১: কোন মাধ্যমে টাকা পাঠাবেন?');
+  if(ms.length&&!ms.includes(cur())) $('method').value=ms[0];
+  $('mBtns').innerHTML=ms.map(m=>`<button type="button" class="btn${cur()===m?' dark':''}" data-m="${m}" style="${cur()===m?'':'background:transparent;box-shadow:inset 0 0 0 1.5px var(--ink);color:var(--ink)'}">${NM[m]}</button>`).join('')
+    ||`<small>${L('Payment numbers are not set yet. Please contact support.','পেমেন্টের নম্বর এখনো বসানো হয়নি। সাপোর্টে যোগাযোগ করুন।')}</small>`;
+  $('mBtns').querySelectorAll('button').forEach(b=>b.onclick=()=>{$('method').value=b.dataset.m;fillDlg()});
+  $('l3').textContent=L('Step 3: The number you sent from','ধাপ ৩: যে নম্বর থেকে টাকা পাঠিয়েছেন');
+  $('hSender').textContent=L('Your own 11-digit number, e.g. 01XXXXXXXXX','আপনার নিজের ১১ সংখ্যার নম্বর, যেমন 01XXXXXXXXX');
+  $('l4').textContent=L('Step 4: TrxID (transaction ID)','ধাপ ৪: TrxID (ট্রানজ্যাকশন আইডি)');
+  $('hTrx').textContent=L('You get it in the confirmation SMS after paying, e.g. CK7M2X91QA','টাকা পাঠানোর পর কনফার্মেশন SMS-এ পাবেন, যেমন CK7M2X91QA');
+  $('sendOrder').textContent=L('Submit order','অর্ডার জমা দিন'); $('closeDlg').textContent=L('Close','বন্ধ করুন');
+  showPayTo();
+}
+function showPayTo(){
+  const m=$('method').value, n=info.settings[m+'_number'], nm=NM[m], el=$('payTo');
+  if(!n){el.innerHTML='';return}
+  el.innerHTML=`<div style="border:1.5px dashed var(--ink);padding:12px 14px;border-radius:3px;background:#10231d0f">
+    <small style="display:block;margin:0 0 6px;font-weight:600">${L('Step 2: Open '+nm+', choose Send Money and send exactly ৳ '+num(chosen.price)+' to this number','ধাপ ২: '+nm+' অ্যাপে Send Money দিয়ে এই নম্বরে ঠিক ৳ '+num(chosen.price)+' পাঠান')}</small>
+    <div style="display:flex;gap:10px;align-items:center;justify-content:space-between"><b class="mono" style="font-size:22px">${esc(n)}</b>
+    <button type="button" class="btn dark" id="copyPay" style="padding:8px 14px">${L('Copy','কপি')}</button></div></div>`;
+  $('copyPay').onclick=async e=>{const b=e.currentTarget, ok=await copyText(n); b.textContent=ok?L('Copied','কপি হয়েছে'):L('Failed','হয়নি'); setTimeout(()=>b.textContent=L('Copy','কপি'),2000)};
+}
 $('closeDlg').onclick=()=>$('orderDlg').close();
 $('sendOrder').onclick=async()=>{
-  const b=$('sendOrder'), m=$('dlgMsg'); b.disabled=true; m.className='msg'; m.textContent='';
+  const b=$('sendOrder'), m=$('dlgMsg'); m.className='msg'; m.textContent='';
+  const bad=t=>{m.className='msg err';m.textContent=t};
+  if(!methods().length) return bad(L('Payment numbers are not set yet.','পেমেন্টের নম্বর এখনো বসানো হয়নি।'));
+  const sender=D($('sender').value).replace(/[\s-]/g,''), trx=D($('trx').value).trim();
+  if(!/^(\+?880|0)1[3-9]\d{8}$/.test(sender)) return bad(L('Enter the 11-digit number you paid from (01XXXXXXXXX).','যে নম্বর থেকে টাকা পাঠিয়েছেন সেটা ১১ সংখ্যায় লিখুন (01XXXXXXXXX)।'));
+  if(!/^[A-Za-z0-9]{6,20}$/.test(trx)) return bad(L('Enter the TrxID from the confirmation SMS (6 to 20 letters or numbers).','কনফার্মেশন SMS-এর TrxID লিখুন (৬ থেকে ২০টি অক্ষর বা সংখ্যা)।'));
+  b.disabled=true;
   try{
-    await api('create_order',{plan_id:chosen.id,pay_method:$('method').value,sender_number:$('sender').value,trx_id:$('trx').value});
-    m.className='msg ok'; m.textContent=L('Order submitted. Your key will appear in your account once it is verified.','অর্ডার জমা হয়েছে। যাচাই হলে key আপনার অ্যাকাউন্টে দেখা যাবে।');
+    await api('create_order',{...(chosen.custom_days?{custom_days:chosen.custom_days}:{plan_id:chosen.id}),pay_method:$('method').value,sender_number:sender,trx_id:trx});
+    m.className='msg ok'; m.textContent=L('Order submitted! We will check your payment, then your key will appear in your account.','অর্ডার জমা হয়েছে! আমরা পেমেন্ট যাচাই করব, তারপর key আপনার অ্যাকাউন্টে দেখা যাবে।');
     $('trx').value=''; loadAccount();
-  }catch(e){m.className='msg err';m.textContent=e.message}
-  b.disabled=false;
+    setTimeout(()=>{if($('orderDlg').open){$('orderDlg').close();location.hash='account'}},3000);
+  }catch(e){bad(e.message);b.disabled=false}
 };
 
 async function copyText(v){
@@ -314,13 +358,15 @@ async function loadAccount(){
 }
 async function init(){
   applyStatic();
-  try{info=await api('public_info')}catch(e){}
+  try{info=await api('public_info')}catch(e){console.error('public_info failed',e)}
   renderPlans();
   const {data}=await sb.auth.getSession(); session=data.session;
   if(session){
     $('loginBtn').classList.add('hide'); $('logoutBtn').classList.remove('hide');
     $('account').classList.remove('hide'); $('whoami').textContent=session.user.email;
     try{await loadAccount()}catch(e){$('whoami').textContent=e.message}
+    setHint();
+    try{const p=sessionStorage.getItem(PEND);if(p){sessionStorage.removeItem(PEND);startOrder(JSON.parse(p))}}catch(e){}
   }
 }
 sb.auth.onAuthStateChange((ev)=>{if(ev==='SIGNED_IN'&&!session) init()});
