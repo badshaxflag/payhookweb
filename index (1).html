@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PayHook: bKash, Nagad, Rocket পেমেন্ট যাচাইয়ের অ্যাপ</title>
+<meta name="description" content="bKash, Nagad আর Rocket-এ নিজের নম্বরে টাকা নিন। পেমেন্ট এলে অ্যাপ নিজেই জমা রাখে, TrxID আর টাকার অঙ্ক মিলিয়ে যাচাই করা যায়। মার্চেন্ট অ্যাকাউন্ট লাগে না।">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="bn_BD">
+<meta property="og:title" content="PayHook: bKash, Nagad, Rocket পেমেন্ট যাচাইয়ের অ্যাপ">
+<meta property="og:description" content="bKash, Nagad আর Rocket-এ নিজের নম্বরে টাকা নিন। পেমেন্ট এলে অ্যাপ নিজেই জমা রাখে, TrxID আর টাকার অঙ্ক মিলিয়ে যাচাই করা যায়। মার্চেন্ট অ্যাকাউন্ট লাগে না।">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anek+Bangla:wght@500;800&family=Hind+Siliguri:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ledger:#173a31; --ledger-2:#10291f; --paper:#ecefe4; --paper-2:#dfe4d2;
+  --ink:#10231d; --muted:#4d6159; --stamp:#2a3fbf; --brass:#c9a24b; --void:#a8362a;
+  --head:'Anek Bangla',sans-serif; --body:'Hind Siliguri',sans-serif; --mono:'IBM Plex Mono',monospace;
+}
+*{box-sizing:border-box;margin:0}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+body{background:var(--ledger);color:var(--paper);font:400 17px/1.7 var(--body);min-height:100vh}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:50;opacity:.16;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .9 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--brass);outline-offset:3px}
+.wrap{width:min(1080px,100% - 40px);margin-inline:auto}
+header{position:sticky;top:0;z-index:20;background:var(--ledger-2);border-bottom:1px solid #ffffff1a}
+header .wrap{display:flex;align-items:center;justify-content:space-between;height:60px;gap:12px}
+.mark{font:800 26px/1 var(--head);text-decoration:none;letter-spacing:-.5px}
+.mark i{font-style:normal;color:var(--brass)}
+nav{display:flex;align-items:center;gap:6px}
+nav a.l{padding:8px 12px;text-decoration:none;font-weight:500;opacity:.85}
+nav a.l:hover{opacity:1}
+.btn{font:600 16px var(--body);border:0;cursor:pointer;padding:11px 20px;border-radius:3px;background:var(--brass);color:var(--ink);text-decoration:none;display:inline-block}
+.btn:hover{filter:brightness(1.08)}
+.btn.ghost{background:transparent;color:var(--paper);box-shadow:inset 0 0 0 1.5px #ecefe466}
+.btn.dark{background:var(--ink);color:var(--paper)}
+.btn[disabled]{opacity:.5;cursor:wait}
+h1,h2,h3{font-family:var(--head);line-height:1.15;font-weight:800}
+.hero{padding:64px 0 88px}
+.hero .wrap{display:grid;grid-template-columns:1.1fr .9fr;gap:56px;align-items:center}
+h1{font-size:clamp(38px,6vw,68px);letter-spacing:-1px;margin-bottom:20px}
+.hero p{max-width:34em;opacity:.88;margin-bottom:30px;font-size:19px}
+.row{display:flex;gap:12px;flex-wrap:wrap}
+/* paper slips */
+.slip{position:relative;background:var(--paper);color:var(--ink);padding:26px 26px 38px;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='p'><feTurbulence type='fractalNoise' baseFrequency='.6' numOctaves='2'/><feColorMatrix values='0 0 0 0 .2  0 0 0 0 .25  0 0 0 0 .15  0 0 0 .13 0'/></filter><rect width='100%' height='100%' filter='url(%23p)'/></svg>");
+  -webkit-mask:conic-gradient(from -45deg at bottom,#0000,#000 1deg 89deg,#0000 90deg) 50%/14px 100%;
+          mask:conic-gradient(from -45deg at bottom,#0000,#000 1deg 89deg,#0000 90deg) 50%/14px 100%;
+  filter:drop-shadow(0 14px 22px #00000066)}
+.hero .slip{transform:rotate(2.2deg);max-width:400px;justify-self:center;width:100%}
+.slip h3{font-size:22px;margin-bottom:4px}
+.slip small{color:var(--muted);display:block;margin-bottom:14px}
+.line{display:flex;justify-content:space-between;gap:16px;padding:9px 0;border-top:1.5px dashed #10231d44}
+.line b{font-weight:500}
+.line span:last-child,.mono{font-family:var(--mono);font-size:15px}
+.stamp{position:absolute;right:22px;bottom:50px;border:3px solid var(--stamp);color:var(--stamp);font:800 24px/1 var(--head);
+  padding:8px 14px;border-radius:5px;transform:rotate(-9deg);opacity:.92;mix-blend-mode:multiply}
+.stamp.pending{border-color:var(--brass);color:#8a6a1e}
+.stamp.bad{border-color:var(--void);color:var(--void)}
+@keyframes land{0%{transform:rotate(-20deg) scale(2.2);opacity:0}60%{transform:rotate(-7deg) scale(.94);opacity:1}100%{transform:rotate(-9deg) scale(1)}}
+.hero .stamp{animation:land .55s .7s cubic-bezier(.3,1.4,.5,1) both}
+section{padding:72px 0}
+section.paper{background:var(--paper);color:var(--ink)}
+section h2{font-size:clamp(28px,4vw,42px);margin-bottom:12px;letter-spacing:-.5px}
+section .sub{max-width:36em;opacity:.8;margin-bottom:36px}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-top:2px solid var(--ink)}
+.step{padding:22px 24px 8px 0}
+.step+.step{padding-left:24px;border-left:1.5px dashed #10231d55}
+.step .n{font:800 52px/1 var(--head);color:var(--stamp);display:block;margin-bottom:10px}
+.step h3{font-size:21px;margin-bottom:6px}
+.plans{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:30px}
+.plan .price{font:800 44px/1.1 var(--head);margin:10px 0 2px}
+.plan .dur{color:var(--muted);margin-bottom:18px}
+.plan .btn{width:100%;text-align:center}
+.empty{border:2px dashed #ecefe455;padding:28px;max-width:520px}
+.acct{display:grid;gap:30px}
+.keybox{font:500 24px/1.3 var(--mono);letter-spacing:1px;margin:6px 0 12px;word-break:break-all}
+.orders .line{align-items:center}
+details{border-top:1.5px solid #10231d55;padding:16px 0}
+details:last-of-type{border-bottom:1.5px solid #10231d55}
+summary{cursor:pointer;font:600 19px var(--head)}
+details p{margin-top:8px;max-width:40em;color:var(--muted)}
+footer{padding:36px 0 56px;font-size:15px;opacity:.7}
+dialog{border:0;padding:0;background:transparent;max-width:min(440px,calc(100% - 24px));width:100%;margin:auto}
+dialog::backdrop{background:#0a1a14d9}
+dialog .slip{filter:none;-webkit-mask:none;mask:none;padding:26px}
+label{display:block;font-weight:600;margin:14px 0 4px}
+input,select{width:100%;font:500 17px var(--mono);padding:11px 12px;border:1.5px solid var(--ink);background:#fff9;color:var(--ink);border-radius:2px}
+.msg{margin-top:12px;font-weight:600}
+.msg.err{color:var(--void)} .msg.ok{color:var(--stamp)}
+.hide{display:none!important}
+@media(max-width:820px){
+  .hero .wrap{grid-template-columns:1fr;gap:40px}
+  .steps{grid-template-columns:1fr}
+  .step+.step{padding-left:0;border-left:0;border-top:1.5px dashed #10231d55}
+  nav a.l{display:none}
+}
+@media(prefers-reduced-motion:reduce){.hero .stamp{animation:none}html{scroll-behavior:auto}}
+button.keybox{display:block;width:100%;text-align:left;cursor:pointer;background:#10231d0f;border:1.5px dashed var(--ink);color:var(--ink);padding:12px 14px;border-radius:3px}
+button.keybox:hover{background:#10231d1f}
+.hint{color:var(--muted);display:block}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <a class="mark" href="#top">Pay<i>Hook</i></a>
+  <nav>
+    <a class="l" href="#how">কীভাবে চলে</a><a class="l" href="#plans">প্ল্যান</a><a class="l" href="#faq">প্রশ্ন</a>
+    <button class="btn ghost" id="langBtn" type="button"></button>
+    <button class="btn" id="loginBtn">Google দিয়ে ঢুকুন</button>
+    <button class="btn ghost hide" id="logoutBtn"></button>
+  </nav>
+</div></header>
+
+<main id="top">
+<div class="hero"><div class="wrap">
+  <div>
+    <h1>নিজের নম্বরে টাকা নিন, পেমেন্ট যাচাই হোক নিজে নিজেই।</h1>
+    <p>PayHook অ্যাপের সাবস্ক্রিপশন নিলে bKash, Nagad আর Rocket-এর প্রতিটা পেমেন্ট নিজে জমা হয়। TrxID আর টাকার অঙ্ক মিলিয়ে কয়েক সেকেন্ডে যাচাই করা যায়, আর একই TrxID দুবার চলে না। মার্চেন্ট অ্যাকাউন্ট লাগে না।</p>
+    <div class="row"><a class="btn" href="#plans">প্ল্যান দেখুন</a><a class="btn ghost" href="#how">কীভাবে চলে</a></div>
+  </div>
+  <div class="slip" aria-label="নমুনা রসিদ">
+    <h3>পেমেন্ট মিলেছে</h3><small>নমুনা, আসল তথ্য নয়</small>
+    <div class="line"><b>TrxID</b><span>CK7M2X91QA</span></div>
+    <div class="line"><b>পরিমাণ</b><span>৳ ৫০০.০০</span></div>
+    <div class="line"><b>মাধ্যম</b><span>bKash</span></div>
+    <div class="line"><b>পাঠিয়েছেন</b><span>01XXXXXXXXX</span></div>
+    <div class="stamp">মিলেছে</div>
+  </div>
+</div></div>
+
+<section class="paper" id="how"><div class="wrap">
+  <h2>কী কী পাবেন</h2>
+  <p class="sub">সাবস্ক্রিপশন নিয়ে নিজের পছন্দের মেয়াদে অ্যাপ চালান।</p>
+  <div class="steps">
+    <div class="step"><h3>এক অ্যাপে তিনটা মাধ্যম</h3><p>bKash, Nagad আর Rocket-এর পেমেন্ট মেসেজ ফোন থেকে নিজে নিজে জমা হয়। হাতে কিছু টুকতে হয় না।</p></div>
+    <div class="step"><h3>ঠিক পেমেন্ট চিনুন</h3><p>কেউ TrxID দিলে টাকার অঙ্কসহ মিলিয়ে দেখা যায়। ভুল বা কম টাকা সাথে সাথে ধরা পড়ে, একই TrxID দ্বিতীয়বার চলে না।</p></div>
+    <div class="step"><h3>মার্চেন্ট অ্যাকাউন্ট লাগে না</h3><p>নিজের ব্যক্তিগত bKash, Nagad বা Rocket নম্বরেই টাকা নিন। টাকা সরাসরি আপনার কাছে আসে, মাঝে কেউ ধরে রাখে না।</p></div>
+  </div>
+  <div style="height:48px"></div>
+  <h2>তিন ধাপে চালু</h2>
+  <p class="sub">কোড লেখা বা সার্ভার বসানো লাগে না। অ্যাপ আর একটা key হলেই হয়।</p>
+  <div class="steps">
+    <div class="step"><span class="n">১</span><h3>key নিন</h3><p>এখানে Google দিয়ে ঢুকে প্ল্যান বেছে অর্ডার দিন। যাচাই হলে আপনার key এই পাতাতেই দেখা যাবে।</p></div>
+    <div class="step"><span class="n">২</span><h3>অ্যাপে ঢুকুন</h3><p>PayHook অ্যাপে key বসিয়ে SMS পড়ার অনুমতি দিন।</p></div>
+    <div class="step"><span class="n">৩</span><h3>মেসেজ নিজেই জমা হয়</h3><p>নতুন পেমেন্ট এলে কয়েক সেকেন্ডে ক্লাউডে জমা হয়। একই মেসেজ দুবার এলেও একবারই থাকে।</p></div>
+  </div>
+</div></section>
+
+<section id="plans"><div class="wrap">
+  <h2>প্ল্যান</h2>
+  <p class="sub" id="notice">মেয়াদ শুরু হয় আপনি প্রথমবার অ্যাপে ঢোকার মুহূর্ত থেকে।</p>
+  <p id="loginHint" data-dyn style="color:#ecefe4cc;margin-bottom:16px"></p>
+  <div class="plans" id="planList" data-dyn></div>
+</div></section>
+
+<section class="paper hide" id="account"><div class="wrap">
+  <h2>আপনার অ্যাকাউন্ট</h2>
+  <p class="sub" id="whoami" data-dyn></p>
+  <div class="acct">
+    <div id="keys" data-dyn></div>
+    <div class="slip orders"><h3>আপনার অর্ডার</h3><small>সর্বশেষ ৫০টি</small><div id="orders" data-dyn></div></div>
+  </div>
+</div></section>
+
+<section class="paper" id="faq"><div class="wrap">
+  <h2>যা জানতে চান</h2><div style="height:18px"></div>
+  <details><summary>PayHook কি আমার টাকা ধরে রাখে?</summary><p>না। এটা শুধু মেসেজ মিলিয়ে দেখার টুল। ব্যাংক বা পেমেন্ট গেটওয়ে নয়। টাকা সরাসরি আপনার নিজের নম্বরে আসে।</p></details>
+  <details><summary>কোন ফোনে চলে?</summary><p>Android ফোনে। অ্যাপকে SMS পড়ার অনুমতি দিতে হয়, আর ব্যাটারি সেভার বন্ধ রাখলে মেসেজ দ্রুত জমা হয়।</p></details>
+  <details><summary>অর্ডারের পর key কখন পাব?</summary><p>আমরা আপনার TrxID আর টাকার অঙ্ক হাতে মিলিয়ে অনুমোদন দিই। হয়ে গেলে key এই পাতার "আপনার অ্যাকাউন্ট" অংশে চলে আসে।</p></details>
+  <details><summary>মেয়াদ কবে থেকে ধরা হয়?</summary><p>প্রথমবার অ্যাপে key দিয়ে ঢোকার মুহূর্ত থেকে। তার আগে পর্যন্ত দিন কমে না।</p></details>
+</div></section>
+</main>
+<footer><div class="wrap"><span id="contact" data-dyn></span> PayHook ব্যাংক বা পেমেন্ট গেটওয়ে নয়।</div></footer>
+
+<dialog id="orderDlg"><div class="slip">
+  <h3 id="dlgTitle" data-dyn></h3><small id="dlgPrice" data-dyn style="font-size:18px;font-weight:700"></small>
+  <label id="l1" data-dyn></label>
+  <div id="mBtns" data-dyn style="display:flex;gap:8px;flex-wrap:wrap"></div>
+  <select id="method" style="display:none"><option value="bkash">bKash</option><option value="nagad">Nagad</option><option value="rocket">Rocket</option></select>
+  <div id="payTo" data-dyn style="margin-top:12px"></div>
+  <label id="l3" for="sender" data-dyn></label><input id="sender" inputmode="numeric" placeholder="01XXXXXXXXX" autocomplete="tel"><small id="hSender" data-dyn class="hint"></small>
+  <label id="l4" for="trx" data-dyn></label><input id="trx" placeholder="CK7M2X91QA" autocapitalize="characters" autocomplete="off"><small id="hTrx" data-dyn class="hint"></small>
+  <div class="row" style="margin-top:18px"><button class="btn dark" id="sendOrder" data-dyn></button><button class="btn ghost" style="color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--ink)" id="closeDlg" data-dyn></button></div>
+  <div class="msg" id="dlgMsg" data-dyn role="status"></div>
+</div></dialog>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+const SB='https://kzgfugomdgrimrnobeej.supabase.co', KEY='sb_publishable_2sd0wUHy6yBNX27oN60vRw_VBn0hxtD';
+const sb=supabase.createClient(SB,KEY);
+let session=null, info={plans:[],settings:{}}, chosen=null, acct=null;
+let lang='en'; try{lang=localStorage.getItem('ph_lang')==='bn'?'bn':'en'}catch(e){}
+const L=(en,bn)=>lang==='bn'?bn:en;
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const num=n=>Number(n).toLocaleString(lang==='bn'?'bn-BD':'en-US');
+const dt=s=>new Date(s).toLocaleDateString(lang==='bn'?'bn-BD':'en-GB',{day:'numeric',month:'long',year:'numeric'});
+
+const DICT={
+'নিজের নম্বরে টাকা নিন, পেমেন্ট যাচাই হোক নিজে নিজেই।':'Accept payments on your own number. Verify them automatically.',
+'PayHook অ্যাপের সাবস্ক্রিপশন নিলে bKash, Nagad আর Rocket-এর প্রতিটা পেমেন্ট নিজে জমা হয়। TrxID আর টাকার অঙ্ক মিলিয়ে কয়েক সেকেন্ডে যাচাই করা যায়, আর একই TrxID দুবার চলে না। মার্চেন্ট অ্যাকাউন্ট লাগে না।':'Subscribe to the PayHook app and every bKash, Nagad and Rocket payment is recorded automatically. Check the TrxID and amount in seconds, and the same TrxID can never be used twice. No merchant account needed.',
+'কী কী পাবেন':'What you get',
+'সাবস্ক্রিপশন নিয়ে নিজের পছন্দের মেয়াদে অ্যাপ চালান।':'Take a subscription and run the app for as long as you choose.',
+'এক অ্যাপে তিনটা মাধ্যম':'Three services, one app',
+'bKash, Nagad আর Rocket-এর পেমেন্ট মেসেজ ফোন থেকে নিজে নিজে জমা হয়। হাতে কিছু টুকতে হয় না।':'Payment messages from bKash, Nagad and Rocket are saved from your phone on their own. Nothing to type in by hand.',
+'ঠিক পেমেন্ট চিনুন':'Know a payment is real',
+'কেউ TrxID দিলে টাকার অঙ্কসহ মিলিয়ে দেখা যায়। ভুল বা কম টাকা সাথে সাথে ধরা পড়ে, একই TrxID দ্বিতীয়বার চলে না।':'When someone gives a TrxID, it is checked against the amount. A wrong or short payment is caught straight away, and a TrxID cannot be reused.',
+'মার্চেন্ট অ্যাকাউন্ট লাগে না':'No merchant account needed',
+'নিজের ব্যক্তিগত bKash, Nagad বা Rocket নম্বরেই টাকা নিন। টাকা সরাসরি আপনার কাছে আসে, মাঝে কেউ ধরে রাখে না।':'Use your own personal bKash, Nagad or Rocket number. The money comes straight to you; nobody holds it in between.',
+'কীভাবে চলে':'How it works','প্ল্যান':'Plans','প্রশ্ন':'FAQ','Google দিয়ে ঢুকুন':'Sign in with Google',
+'SMS আসে, পেমেন্ট মিলে যায়।':'The SMS arrives. The payment matches.',
+'bKash, Nagad আর Rocket-এর পেমেন্ট মেসেজ ফোন থেকে নিজে নিজে জমা হয়। কেউ TrxID দিলে টাকার অঙ্কসহ মিলিয়ে দেখা যায়, আর একই TrxID দ্বিতীয়বার চলে না।':'Payment messages from bKash, Nagad and Rocket are uploaded from your phone automatically. When someone submits a TrxID, you can check it along with the amount, and the same TrxID cannot be used twice.',
+'প্ল্যান দেখুন':'See plans','পেমেন্ট মিলেছে':'Payment matched','নমুনা, আসল তথ্য নয়':'Sample, not real data',
+'পরিমাণ':'Amount','মাধ্যম':'Method','পাঠিয়েছেন':'Sent by','মিলেছে':'Matched',
+'তিন ধাপে চালু':'Up and running in three steps',
+'কোড লেখা বা সার্ভার বসানো লাগে না। অ্যাপ আর একটা key হলেই হয়।':'No coding and no server to set up. You only need the app and a key.',
+'key নিন':'Get your key',
+'এখানে Google দিয়ে ঢুকে প্ল্যান বেছে অর্ডার দিন। যাচাই হলে আপনার key এই পাতাতেই দেখা যাবে।':'Sign in with Google here, pick a plan and place an order. Once it is verified, your key appears on this page.',
+'অ্যাপে ঢুকুন':'Sign in to the app',
+'PayHook অ্যাপে key বসিয়ে SMS পড়ার অনুমতি দিন।':'Enter the key in the PayHook app and allow SMS access.',
+'মেসেজ নিজেই জমা হয়':'Messages upload on their own',
+'নতুন পেমেন্ট এলে কয়েক সেকেন্ডে ক্লাউডে জমা হয়। একই মেসেজ দুবার এলেও একবারই থাকে।':'A new payment reaches the cloud within seconds. If the same message arrives twice, it is kept once.',
+'মেয়াদ শুরু হয় আপনি প্রথমবার অ্যাপে ঢোকার মুহূর্ত থেকে।':'The validity period starts the first time you sign in to the app.',
+'আপনার অ্যাকাউন্ট':'Your account','আপনার অর্ডার':'Your orders','সর্বশেষ ৫০টি':'Latest 50','যা জানতে চান':'Questions',
+'PayHook কি আমার টাকা ধরে রাখে?':'Does PayHook hold my money?',
+'না। এটা শুধু মেসেজ মিলিয়ে দেখার টুল। ব্যাংক বা পেমেন্ট গেটওয়ে নয়। টাকা সরাসরি আপনার নিজের নম্বরে আসে।':'No. It is only a tool that matches messages. It is not a bank or a payment gateway. Money goes straight to your own number.',
+'কোন ফোনে চলে?':'Which phones does it work on?',
+'Android ফোনে। অ্যাপকে SMS পড়ার অনুমতি দিতে হয়, আর ব্যাটারি সেভার বন্ধ রাখলে মেসেজ দ্রুত জমা হয়।':'Android phones. The app needs permission to read SMS, and messages upload faster if battery saver is off for it.',
+'অর্ডারের পর key কখন পাব?':'When do I get my key after ordering?',
+'আমরা আপনার TrxID আর টাকার অঙ্ক হাতে মিলিয়ে অনুমোদন দিই। হয়ে গেলে key এই পাতার "আপনার অ্যাকাউন্ট" অংশে চলে আসে।':'We check your TrxID and amount by hand and approve the order. Your key then shows up in the "Your account" section of this page.',
+'মেয়াদ কবে থেকে ধরা হয়?':'When does the validity start?',
+'প্রথমবার অ্যাপে key দিয়ে ঢোকার মুহূর্ত থেকে। তার আগে পর্যন্ত দিন কমে না।':'From the moment you first sign in to the app with the key. Days do not count down before that.',
+'PayHook ব্যাংক বা পেমেন্ট গেটওয়ে নয়।':'PayHook is not a bank or a payment gateway.',
+'কোন মাধ্যমে টাকা পাঠিয়েছেন':'Which method did you pay with','যে নম্বর থেকে পাঠিয়েছেন':'Number you sent from',
+'অর্ডার জমা দিন':'Submit order','বন্ধ করুন':'Close'};
+
+function applyStatic(){
+  document.documentElement.lang=lang;
+  document.title=L('PayHook: payment verification for bKash, Nagad and Rocket','PayHook: bKash, Nagad, Rocket পেমেন্ট যাচাইয়ের অ্যাপ');
+  const w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT,{acceptNode:n=>n.parentElement.closest('script,style,[data-dyn]')?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT});
+  let n; while((n=w.nextNode())){
+    const t=n.nodeValue.trim(); if(!t) continue;
+    if(n.__o===undefined){ if(!DICT[t]) continue; n.__o=n.nodeValue; }
+    const key=n.__o.trim();
+    n.nodeValue= lang==='en' ? n.__o.replace(key,DICT[key]) : n.__o;
+  }
+  $('langBtn').textContent=lang==='en'?'বাংলা':'English';
+  $('langBtn').setAttribute('aria-label',L('Switch to Bengali','ইংরেজিতে দেখুন'));
+  document.querySelector('.slip[aria-label]').setAttribute('aria-label',L('Sample receipt','নমুনা রসিদ'));
+  $('logoutBtn').textContent=L('Sign out','বের হোন');
+  document.querySelectorAll('.step .n').forEach((e,i)=>e.textContent=lang==='bn'?'১২৩'[i]:String(i+1));
+}
+$('langBtn').onclick=()=>{lang=lang==='en'?'bn':'en';try{localStorage.setItem('ph_lang',lang)}catch(e){}
+  applyStatic();renderPlans();renderAccount();if($('orderDlg').open){fillDlg()}};
+
+async function api(action,body={}){
+  const h={'Content-Type':'application/json',apikey:KEY};
+  if(session) h.Authorization='Bearer '+session.access_token;
+  const r=await fetch(SB+'/functions/v1/ph-user',{method:'POST',headers:h,body:JSON.stringify({action,...body})});
+  const j=await r.json().catch(()=>({}));
+  if(!r.ok) throw new Error(j.detail||L('Something went wrong. Please try again.','সমস্যা হয়েছে, আবার চেষ্টা করুন'));
+  return j;
+}
+const login=()=>sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:location.origin+location.pathname}});
+$('loginBtn').onclick=login;
+$('logoutBtn').onclick=async()=>{await sb.auth.signOut();location.hash='';location.reload()};
+
+function renderPlans(){
+  const el=$('planList'), s=info.settings;
+  setHint();
+  if(s.notice) $('notice').textContent=s.notice;
+  $('contact').textContent=s.support_contact?(L('Contact: ','যোগাযোগ: ')+s.support_contact+(lang==='bn'?'।':'.')):'';
+  if(!info.plans.length){el.innerHTML=customCard()+'<div class="empty">'+L('No plans have been added yet. Please check back soon.','প্ল্যান এখনো যোগ করা হয়নি। একটু পরে আবার দেখুন।')+'</div>';bindCustom();return}
+  el.innerHTML=info.plans.map(p=>`<div class="slip plan"><h3>${esc(p.name)}</h3>
+    <div class="price">৳ ${num(p.price)}</div><div class="dur">${p.lifetime?L('Lifetime','লাইফটাইম'):num(p.days)+L(' days',' দিন')}</div>
+    <button class="btn dark" data-id="${esc(p.id)}">${L('Order now','অর্ডার করুন')}</button></div>`).join('')+customCard();
+  el.querySelectorAll('button[data-id]').forEach(b=>b.onclick=()=>openOrder(b.dataset.id));
+  bindCustom();
+}
+const TIERS=()=>info.custom_pricing||[[30,1.2],[90,1],[365,0.9],[3650,0.8]];
+function cPrice(n){const t=TIERS();let tot=0,prev=0;for(const [u,r] of t){if(n<=prev)break;tot+=(Math.min(n,u)-prev)*r;prev=u}if(n>prev)tot+=(n-prev)*t[t.length-1][1];return Math.round(tot*100)/100}
+function customCard(){return `<div class="slip plan"><h3>${L('Custom days','নিজের পছন্দের দিন')}</h3>
+  <input id="cDays" type="number" inputmode="numeric" min="1" max="3650" value="45" style="text-align:center">
+  <div class="price" id="cPrice">৳ ${num(cPrice(45))}</div><div class="dur" id="cDur">${num(45)}${L(' days',' দিন')}</div>
+  <button class="btn dark" id="cOrder">${L('Order now','অর্ডার করুন')}</button></div>`}
+const D=t=>String(t??'').replace(/[০-৯]/g,c=>'০১২৩৪৫৬৭৮৯'.indexOf(c));
+const PEND='ph_pending', NM={bkash:'bKash',nagad:'Nagad',rocket:'Rocket'};
+const methods=()=>['bkash','nagad','rocket'].filter(m=>info.settings[m+'_number']);
+function setHint(){$('loginHint').textContent=session?'':L('You need to sign in with Google to order. It takes one tap.','অর্ডার করতে Google দিয়ে লগইন করতে হবে, এক ট্যাপেই হয়ে যায়।')}
+function startOrder(o){
+  if(!session){try{sessionStorage.setItem(PEND,JSON.stringify(o))}catch(e){} login();return}
+  if(o.custom_days) chosen={id:null,price:cPrice(o.custom_days),custom_days:o.custom_days};
+  else{chosen=info.plans.find(p=>p.id===o.plan_id); if(!chosen) return}
+  $('dlgMsg').textContent='';$('dlgMsg').className='msg';$('sendOrder').disabled=false;
+  fillDlg(); $('orderDlg').showModal();
+}
+const openOrder=id=>startOrder({plan_id:id});
+function bindCustom(){
+  const i=$('cDays'); if(!i) return;
+  const val=()=>{const n=parseInt(D(i.value),10);return Number.isInteger(n)&&n>=1&&n<=3650?n:null};
+  i.oninput=()=>{const n=val();$('cPrice').textContent=n?'৳ '+num(cPrice(n)):'—';$('cDur').textContent=n?num(n)+L(' days',' দিন'):L('Enter 1 to 3650 days','১ থেকে ৩৬৫০ দিন দিন')};
+  $('cOrder').onclick=()=>{const n=val(); if(!n){i.focus();return} startOrder({custom_days:n})};
+}
+function fillDlg(){
+  const ms=methods(), cur=()=>$('method').value;
+  $('dlgTitle').textContent=chosen.custom_days?L('Custom '+chosen.custom_days+' days','কাস্টম '+num(chosen.custom_days)+' দিন'):chosen.name;
+  $('dlgPrice').textContent=L('Total to send: ৳ '+num(chosen.price),'মোট পাঠাতে হবে: ৳ '+num(chosen.price));
+  $('l1').textContent=L('Step 1: Choose how you will pay','ধাপ ১: কোন মাধ্যমে টাকা পাঠাবেন?');
+  if(ms.length&&!ms.includes(cur())) $('method').value=ms[0];
+  $('mBtns').innerHTML=ms.map(m=>`<button type="button" class="btn${cur()===m?' dark':''}" data-m="${m}" style="${cur()===m?'':'background:transparent;box-shadow:inset 0 0 0 1.5px var(--ink);color:var(--ink)'}">${NM[m]}</button>`).join('')
+    ||`<small>${L('Payment numbers are not set yet. Please contact support.','পেমেন্টের নম্বর এখনো বসানো হয়নি। সাপোর্টে যোগাযোগ করুন।')}</small>`;
+  $('mBtns').querySelectorAll('button').forEach(b=>b.onclick=()=>{$('method').value=b.dataset.m;fillDlg()});
+  $('l3').textContent=L('Step 3: The number you sent from','ধাপ ৩: যে নম্বর থেকে টাকা পাঠিয়েছেন');
+  $('hSender').textContent=L('Your own 11-digit number, e.g. 01XXXXXXXXX','আপনার নিজের ১১ সংখ্যার নম্বর, যেমন 01XXXXXXXXX');
+  $('l4').textContent=L('Step 4: TrxID (transaction ID)','ধাপ ৪: TrxID (ট্রানজ্যাকশন আইডি)');
+  $('hTrx').textContent=L('You get it in the confirmation SMS after paying, e.g. CK7M2X91QA','টাকা পাঠানোর পর কনফার্মেশন SMS-এ পাবেন, যেমন CK7M2X91QA');
+  $('sendOrder').textContent=L('Submit order','অর্ডার জমা দিন'); $('closeDlg').textContent=L('Close','বন্ধ করুন');
+  showPayTo();
+}
+function showPayTo(){
+  const m=$('method').value, n=info.settings[m+'_number'], nm=NM[m], el=$('payTo');
+  if(!n){el.innerHTML='';return}
+  el.innerHTML=`<div style="border:1.5px dashed var(--ink);padding:12px 14px;border-radius:3px;background:#10231d0f">
+    <small style="display:block;margin:0 0 6px;font-weight:600">${L('Step 2: Open '+nm+', choose Send Money and send exactly ৳ '+num(chosen.price)+' to this number','ধাপ ২: '+nm+' অ্যাপে Send Money দিয়ে এই নম্বরে ঠিক ৳ '+num(chosen.price)+' পাঠান')}</small>
+    <div style="display:flex;gap:10px;align-items:center;justify-content:space-between"><b class="mono" style="font-size:22px">${esc(n)}</b>
+    <button type="button" class="btn dark" id="copyPay" style="padding:8px 14px">${L('Copy','কপি')}</button></div></div>`;
+  $('copyPay').onclick=async e=>{const b=e.currentTarget, ok=await copyText(n); b.textContent=ok?L('Copied','কপি হয়েছে'):L('Failed','হয়নি'); setTimeout(()=>b.textContent=L('Copy','কপি'),2000)};
+}
+$('closeDlg').onclick=()=>$('orderDlg').close();
+$('sendOrder').onclick=async()=>{
+  const b=$('sendOrder'), m=$('dlgMsg'); m.className='msg'; m.textContent='';
+  const bad=t=>{m.className='msg err';m.textContent=t};
+  if(!methods().length) return bad(L('Payment numbers are not set yet.','পেমেন্টের নম্বর এখনো বসানো হয়নি।'));
+  const sender=D($('sender').value).replace(/[\s-]/g,''), trx=D($('trx').value).trim();
+  if(!/^(\+?880|0)1[3-9]\d{8}$/.test(sender)) return bad(L('Enter the 11-digit number you paid from (01XXXXXXXXX).','যে নম্বর থেকে টাকা পাঠিয়েছেন সেটা ১১ সংখ্যায় লিখুন (01XXXXXXXXX)।'));
+  if(!/^[A-Za-z0-9]{6,20}$/.test(trx)) return bad(L('Enter the TrxID from the confirmation SMS (6 to 20 letters or numbers).','কনফার্মেশন SMS-এর TrxID লিখুন (৬ থেকে ২০টি অক্ষর বা সংখ্যা)।'));
+  b.disabled=true;
+  try{
+    await api('create_order',{...(chosen.custom_days?{custom_days:chosen.custom_days}:{plan_id:chosen.id}),pay_method:$('method').value,sender_number:sender,trx_id:trx});
+    m.className='msg ok'; m.textContent=L('Order submitted! We will check your payment, then your key will appear in your account.','অর্ডার জমা হয়েছে! আমরা পেমেন্ট যাচাই করব, তারপর key আপনার অ্যাকাউন্টে দেখা যাবে।');
+    $('trx').value=''; loadAccount();
+    setTimeout(()=>{if($('orderDlg').open){$('orderDlg').close();location.hash='account'}},3000);
+  }catch(e){bad(e.message);b.disabled=false}
+};
+
+async function copyText(v){
+  try{await navigator.clipboard.writeText(v);return true}catch(e){
+    const t=document.createElement('textarea');t.value=v;t.style.cssText='position:fixed;opacity:0';document.body.appendChild(t);t.select();
+    let ok=false;try{ok=document.execCommand('copy')}catch(e){} t.remove();return ok}
+}
+function keyStatus(k){
+  if(!k.active) return L('Disabled','বন্ধ করা আছে');
+  if(k.lifetime) return L('Lifetime','লাইফটাইম');
+  if(!k.activated_at) return L('Runs for '+num(k.days)+' days from your first sign-in','প্রথম লগইন থেকে '+num(k.days)+' দিন চলবে');
+  const left=Math.ceil((new Date(k.expires_at)-Date.now())/864e5);
+  return left>0?L(num(left)+' days left, ends '+dt(k.expires_at),num(left)+' দিন বাকি, শেষ হবে '+dt(k.expires_at)):L('Expired','মেয়াদ শেষ');
+}
+function renderAccount(){
+  if(!acct) return;
+  const ST={pending:[L('Pending','অপেক্ষায়'),'pending'],approved:[L('Approved','অনুমোদিত'),''],rejected:[L('Rejected','বাতিল'),'bad']};
+  const hint=L('Tap the key to copy it','key-তে চাপ দিলেই কপি হবে');
+  $('keys').innerHTML=acct.keys.map(x=>`<div class="slip"><h3>${L('Your key','আপনার key')}</h3><small>${esc(keyStatus(x))}</small>
+    <button type="button" class="keybox" data-copy="${esc(x.key)}">${esc(x.key)}</button><small class="hint" style="margin:8px 0 0">${hint}</small></div>`).join('');
+  $('keys').querySelectorAll('.keybox').forEach(b=>b.onclick=async()=>{
+    const h=b.nextElementSibling, ok=await copyText(b.dataset.copy);
+    h.textContent=ok?L('Copied','কপি হয়েছে'):L('Could not copy. Press and hold the key to select it.','কপি করা যায়নি। key-তে চেপে ধরে সিলেক্ট করুন');
+    setTimeout(()=>h.textContent=hint,2200)});
+  $('orders').innerHTML=acct.orders.length?acct.orders.map(x=>{const s=ST[x.status]||ST.pending;
+    return `<div class="line"><span><b>${esc(x.plan_name)}</b><br><span class="mono">${esc(x.trx_id)}</span>${x.admin_note?'<br><small style="margin:0">'+esc(x.admin_note)+'</small>':''}</span>
+    <span class="stamp ${s[1]}" style="position:static;font-size:16px;padding:5px 9px;transform:rotate(-4deg)">${s[0]}</span></div>`}).join('')
+    :'<p>'+L('No orders yet. Pick a plan above to get started.','এখনো কোনো অর্ডার নেই। উপরের প্ল্যান থেকে শুরু করুন।')+'</p>';
+}
+async function loadAccount(){
+  const [k,o]=await Promise.all([api('my_keys'),api('my_orders')]);
+  acct={keys:k.keys,orders:o.orders}; renderAccount();
+}
+async function init(){
+  applyStatic();
+  try{info=await api('public_info')}catch(e){console.error('public_info failed',e)}
+  renderPlans();
+  const {data}=await sb.auth.getSession(); session=data.session;
+  if(session){
+    $('loginBtn').classList.add('hide'); $('logoutBtn').classList.remove('hide');
+    $('account').classList.remove('hide'); $('whoami').textContent=session.user.email;
+    try{await loadAccount()}catch(e){$('whoami').textContent=e.message}
+    setHint();
+    try{const p=sessionStorage.getItem(PEND);if(p){sessionStorage.removeItem(PEND);startOrder(JSON.parse(p))}}catch(e){}
+  }
+}
+sb.auth.onAuthStateChange((ev)=>{if(ev==='SIGNED_IN'&&!session) init()});
+init();
+</script>
+</body>
+</html>
