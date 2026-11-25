@@ -108,7 +108,7 @@ button.keybox:hover{background:#10231d1f}
 <header><div class="wrap">
   <a class="mark" href="#top">Pay<i>Hook</i></a>
   <nav>
-    <a class="l" href="#how">কীভাবে চলে</a><a class="l" href="#plans">প্ল্যান</a><a class="l" href="#faq">প্রশ্ন</a><a class="l" href="#help">যোগাযোগ</a>
+    <a class="l" href="#how">কীভাবে চলে</a><a class="l" href="#plans">প্ল্যান</a><a class="l hide" id="ordersNav" href="#myorders">আমার অর্ডার</a><a class="l" href="#faq">প্রশ্ন</a><a class="l" href="#help">যোগাযোগ</a>
     <button class="btn ghost" id="langBtn" type="button"></button>
     <button class="btn" id="loginBtn">Google দিয়ে ঢুকুন</button>
     <button class="btn ghost hide" id="logoutBtn"></button>
@@ -163,8 +163,14 @@ button.keybox:hover{background:#10231d1f}
   <p class="sub" id="whoami" data-dyn></p>
   <div class="acct">
     <div id="keys" data-dyn></div>
-    <div class="slip orders"><h3>আপনার অর্ডার</h3><small>সর্বশেষ ৫০টি</small><div id="orders" data-dyn></div></div>
   </div>
+  <p style="margin-top:22px"><a class="btn dark" href="#myorders">আমার অর্ডার দেখুন</a></p>
+</div></section>
+
+<section class="hide" id="myorders"><div class="wrap">
+  <h2>আমার অর্ডার</h2>
+  <p class="sub" style="color:#ecefe4cc">এখানে আপনার সব অর্ডার আর তার অবস্থা দেখা যাবে।</p>
+  <div class="slip orders"><small>সর্বশেষ ৫০টি</small><div id="orders" data-dyn></div></div>
 </div></section>
 
 <section class="paper" id="faq"><div class="wrap">
@@ -177,7 +183,7 @@ button.keybox:hover{background:#10231d1f}
 <section id="help"><div class="wrap">
   <h2>সাহায্য লাগলে যোগাযোগ করুন</h2>
   <p class="sub">অর্ডার, key বা অ্যাপ নিয়ে কোনো সমস্যা হলে সরাসরি জানান।</p>
-  <div class="row"><a class="btn" href="https://wa.me/8801828806133" target="_blank" rel="noopener">WhatsApp: 01828806133</a><a class="btn ghost" href="https://t.me/badshax4flag" target="_blank" rel="noopener">Telegram: @badshax4flag</a></div>
+  <div class="row"><a class="btn" href="https://wa.me/8801828806133" target="_blank" rel="noopener">WhatsApp</a><a class="btn ghost" href="https://t.me/badshax4flag" target="_blank" rel="noopener">Telegram</a></div>
 </div></section>
 </main>
 <footer><div class="wrap"><span id="contact" data-dyn></span> PayHook ব্যাংক বা পেমেন্ট গেটওয়ে নয়।</div></footer>
@@ -208,6 +214,9 @@ const num=n=>Number(n).toLocaleString(lang==='bn'?'bn-BD':'en-US');
 const dt=s=>new Date(s).toLocaleDateString(lang==='bn'?'bn-BD':'en-GB',{day:'numeric',month:'long',year:'numeric'});
 
 const DICT={
+'আমার অর্ডার':'My orders',
+'আমার অর্ডার দেখুন':'View my orders',
+'এখানে আপনার সব অর্ডার আর তার অবস্থা দেখা যাবে।':'All your orders and their status appear here.',
 'যোগাযোগ':'Contact',
 'সাহায্য লাগলে যোগাযোগ করুন':'Need help? Contact us',
 'অর্ডার, key বা অ্যাপ নিয়ে কোনো সমস্যা হলে সরাসরি জানান।':'Problems with an order, your key or the app? Message us directly.',
@@ -354,7 +363,7 @@ $('sendOrder').onclick=async()=>{
     await api('create_order',{...(chosen.custom_days?{custom_days:chosen.custom_days}:{plan_id:chosen.id}),pay_method:$('method').value,sender_number:sender,trx_id:trx});
     m.className='msg ok'; m.textContent=L('Order submitted! We will check your payment, then your key will appear in your account.','অর্ডার জমা হয়েছে! আমরা পেমেন্ট যাচাই করব, তারপর key আপনার অ্যাকাউন্টে দেখা যাবে।');
     $('trx').value=''; loadAccount();
-    setTimeout(()=>{if($('orderDlg').open){$('orderDlg').close();location.hash='account'}},3000);
+    setTimeout(()=>{if($('orderDlg').open){$('orderDlg').close();location.hash='myorders'}},3000);
   }catch(e){bad(e.message);b.disabled=false}
 };
 
@@ -397,7 +406,7 @@ async function init(){
   const {data}=await sb.auth.getSession(); session=data.session;
   if(session){
     $('loginBtn').classList.add('hide'); $('logoutBtn').classList.remove('hide');
-    $('account').classList.remove('hide'); $('whoami').textContent=session.user.email;
+    $('account').classList.remove('hide'); $('myorders').classList.remove('hide'); $('ordersNav').classList.remove('hide'); $('whoami').textContent=session.user.email;
     try{await loadAccount()}catch(e){$('whoami').textContent=e.message}
     setHint();
     try{const p=sessionStorage.getItem(PEND);if(p){sessionStorage.removeItem(PEND);startOrder(JSON.parse(p))}}catch(e){}
