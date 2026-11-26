@@ -103,29 +103,15 @@ button.keybox{display:block;width:100%;text-align:left;cursor:pointer;background
 button.keybox:hover{background:#10231d1f}
 .hint{color:var(--muted);display:block}
 
-#topbar{position:fixed;top:0;left:0;height:3px;width:0;opacity:0;background:var(--brass);box-shadow:0 0 10px var(--brass);z-index:60;pointer-events:none}
-.pg-off{display:none!important}
-.hero,section{min-height:calc(100vh - 60px)}
-.pgin{animation:pgin .38s ease both}
-@keyframes pgin{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-nav a.l.on{opacity:1;color:var(--brass)}
-#tabs{display:none}
-@media(max-width:820px){
-  #tabs{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--ledger-2);border-top:1px solid #ffffff1a;padding-bottom:env(safe-area-inset-bottom,0px)}
-  #tabs a{flex:1;text-align:center;padding:11px 2px 10px;font:600 12px/1.2 var(--body);color:#ecefe4aa;text-decoration:none;border-top:3px solid transparent;margin-top:-1px}
-  #tabs a.on{color:var(--brass);border-top-color:var(--brass)}
-  body{padding-bottom:calc(52px + env(safe-area-inset-bottom,0px))}
-  .hero,section{min-height:calc(100vh - 112px)}
-}
-@media(prefers-reduced-motion:reduce){.pgin{animation:none}}
+header .btn{white-space:nowrap}
+@media(max-width:520px){header .btn{padding:8px 12px;font-size:15px}}
 </style>
 </head>
 <body>
-<div id="topbar"></div>
 <header><div class="wrap">
-  <a class="mark" href="#home" data-pg="home">Pay<i>Hook</i></a>
+  <a class="mark" href="#top">Pay<i>Hook</i></a>
   <nav>
-    <a class="l" href="#how" data-pg="how">কীভাবে চলে</a><a class="l" href="#plans" data-pg="plans">প্ল্যান</a><a class="l hide" id="accNav" href="#account" data-pg="account">অ্যাকাউন্ট</a><a class="l hide" id="ordersNav" href="#myorders" data-pg="myorders">আমার অর্ডার</a><a class="l" href="#faq" data-pg="faq">প্রশ্ন</a><a class="l" href="#help" data-pg="help">যোগাযোগ</a>
+    <a class="l" href="#how">কীভাবে চলে</a><a class="l" href="#plans">প্ল্যান</a><a class="l hide" id="accNav" href="#account">অ্যাকাউন্ট</a><a class="l hide" id="ordersNav" href="#myorders">আমার অর্ডার</a><a class="l" href="#faq">প্রশ্ন</a><a class="l" href="#help">যোগাযোগ</a>
     <button class="btn ghost" id="langBtn" type="button"></button>
     <button class="btn" id="loginBtn">Google দিয়ে ঢুকুন</button>
     <button class="btn ghost hide" id="logoutBtn"></button>
@@ -246,9 +232,7 @@ nav a.l.on{opacity:1;color:var(--brass)}
 </main>
 <footer><div class="wrap"><span id="contact" data-dyn></span> PayHook ব্যাংক বা পেমেন্ট গেটওয়ে নয়।</div></footer>
 
-<div id="tabs">
-  <a href="#home" data-pg="home" id="tHome"></a><a href="#how" data-pg="how" id="tHow"></a><a href="#plans" data-pg="plans" id="tPlans"></a><a href="#faq" data-pg="faq" id="tFaq"></a><a href="#help" data-pg="help" id="tHelp"></a><a href="#account" data-pg="account" id="tAcc"></a>
-</div>
+
 <dialog id="orderDlg"><div class="slip">
   <h3 id="dlgTitle" data-dyn></h3><small id="dlgPrice" data-dyn style="font-size:18px;font-weight:700"></small>
   <label id="l1" data-dyn></label>
@@ -348,7 +332,6 @@ function applyStatic(){
   document.querySelector('.slip[aria-label]').setAttribute('aria-label',L('Sample receipt','নমুনা রসিদ'));
   $('logoutBtn').textContent=L('Sign out','বের হোন');
   document.querySelectorAll('.gn').forEach((e,i)=>e.textContent=lang==='bn'?'১২৩'[i%3]:String(i%3+1));
-  [['tHome','Home','হোম'],['tHow','How','কীভাবে'],['tPlans','Plans','প্ল্যান'],['tFaq','FAQ','প্রশ্ন'],['tHelp','Help','যোগাযোগ'],['tAcc','Account','অ্যাকাউন্ট']].forEach(([i,e,b])=>{const el=$(i);if(el)el.textContent=L(e,b)});
   if($('copyApi')) $('copyApi').textContent=L('Copy','কপি'); if($('copyCode')) $('copyCode').textContent=L('Copy code','কোড কপি করুন');
   document.querySelectorAll('.step .n').forEach((e,i)=>e.textContent=lang==='bn'?'১২৩'[i]:String(i+1));
 }
@@ -574,38 +557,7 @@ if (res.status === "success") {
     setHint();
     try{const p=sessionStorage.getItem(PEND);if(p){sessionStorage.removeItem(PEND);startOrder(JSON.parse(p))}}catch(e){}
   }
-  curPage=null; route(true);
 }
-// ===== পেজ বদল: প্রতিটা বোতামে আলাদা পেজ, ওপরে লোডিং দাগ =====
-const PAGES=['home','how','plans','account','myorders','faq','help'];
-const viewEl=n=>$(n==='home'?'homeView':n);
-let curPage=null, barTimer=null;
-function setPage(p){
-  PAGES.forEach(n=>viewEl(n).classList.toggle('pg-off',n!==p));
-  document.querySelectorAll('[data-pg]').forEach(a=>a.classList.toggle('on',a.dataset.pg===p||(p==='myorders'&&a.dataset.pg==='account')));
-  const v=viewEl(p); v.classList.remove('pgin'); void v.offsetWidth; v.classList.add('pgin');
-  window.scrollTo({top:0,behavior:'instant'});
-}
-function runBar(done){
-  const bar=$('topbar'); clearTimeout(barTimer);
-  bar.style.transition='none'; bar.style.opacity='1'; bar.style.width='0';
-  void bar.offsetWidth;
-  bar.style.transition='width .34s ease-out'; bar.style.width='72%';
-  barTimer=setTimeout(()=>{
-    done();
-    bar.style.transition='width .2s ease-in'; bar.style.width='100%';
-    barTimer=setTimeout(()=>{bar.style.transition='opacity .3s'; bar.style.opacity='0'},230);
-  },340);
-}
-function route(instant){
-  let p=location.hash.replace('#',''); if(!PAGES.includes(p)) p='home';
-  if((p==='account'||p==='myorders')&&!session) p='plans';
-  if(p===curPage) return;
-  curPage=p;
-  if(instant||curPage===null) setPage(p); else runBar(()=>setPage(p));
-}
-window.addEventListener('hashchange',()=>route(false));
-$('tAcc').addEventListener('click',e=>{if(!session){e.preventDefault();login()}});
 sb.auth.onAuthStateChange((ev)=>{if(ev==='SIGNED_IN'&&!session) init()});
 init();
 </script>
