@@ -164,6 +164,22 @@ button.keybox:hover{background:#10231d1f}
   <div class="acct">
     <div id="keys" data-dyn></div>
   </div>
+  <div class="slip guide" style="margin-top:22px">
+    <h3>চালু করবেন যেভাবে</h3>
+    <div style="display:grid;gap:12px;margin:12px 0 16px">
+      <div style="display:flex;gap:12px"><span class="gn mono" style="font-weight:700;min-width:18px"></span><div><b>অ্যাপ নামান।</b> যে ফোনে bKash, Nagad বা Rocket-এর SIM আছে, সেই ফোনে অ্যাপটা ডাউনলোড করে ইনস্টল করুন।</div></div>
+      <div style="display:flex;gap:12px"><span class="gn mono" style="font-weight:700;min-width:18px"></span><div><b>key বসান।</b> অ্যাপ খুলে ওপরের key বসান, তারপর SMS-এর অনুমতি দিন।</div></div>
+      <div style="display:flex;gap:12px"><span class="gn mono" style="font-weight:700;min-width:18px"></span><div><b>সাইটে যুক্ত করুন।</b> আপনার সাইট বা বট থেকে নিচের ঠিকানায় পেমেন্ট যাচাই করুন। ডেভেলপার থাকলে তাকে এই ঠিকানা আর key দিন।</div></div>
+    </div>
+    <a class="btn dark hide" id="guideApp" href="#" rel="noopener">অ্যাপ ডাউনলোড করুন</a>
+    <small id="guideNoApp">ডাউনলোডের লিংক শীঘ্রই এখানে যোগ হবে।</small>
+    <label style="margin-top:18px">যাচাইয়ের ঠিকানা</label>
+    <div style="display:flex;gap:10px"><input readonly id="apiUrl" class="mono" style="font-size:13px"><button type="button" class="btn dark" id="copyApi" data-dyn style="padding:8px 16px"></button></div>
+    <details style="margin-top:14px"><summary>ডেভেলপারের জন্য</summary>
+      <p>method-এ BKASH, NAGAD বা ROCKET লিখুন। amount ফাঁকা বা ০ দিলে যেকোনো অঙ্ক মিলবে। client_name হলো আপনার সাইটের ডোমেইন, key প্রথম যে ডোমেইনে ব্যবহার হয় সেটার সাথেই বাঁধা পড়ে। সফল হলে status হবে success, আর একই TrxID দ্বিতীয়বার নেবে না।</p>
+      <pre id="apiSample" class="mono" style="white-space:pre-wrap;word-break:break-all;font-size:12px;background:#10231d12;padding:10px;border-radius:3px;margin-top:8px"></pre>
+    </details>
+  </div>
   <p style="margin-top:22px"><a class="btn dark" href="#myorders">আমার অর্ডার দেখুন</a></p>
 </div></section>
 
@@ -202,7 +218,9 @@ button.keybox:hover{background:#10231d1f}
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script>
-const APP_URL=''; // অ্যাপের ডাউনলোড লিংক এখানে বসান, বসালেই বোতাম দেখাবে
+// ===== অ্যাপের ডাউনলোড লিংক: Google Drive-এর শেয়ার লিংক এই দুই কোটের মাঝে বসান =====
+const APP_URL='https://www.mediafire.com/file/geixxfvluc7rb5j/base.apk/file';
+// =====================================================================
 const SB='https://kzgfugomdgrimrnobeej.supabase.co', KEY='sb_publishable_2sd0wUHy6yBNX27oN60vRw_VBn0hxtD';
 const sb=supabase.createClient(SB,KEY);
 let session=null, info={plans:[],settings:{}}, chosen=null, acct=null;
@@ -214,6 +232,17 @@ const num=n=>Number(n).toLocaleString(lang==='bn'?'bn-BD':'en-US');
 const dt=s=>new Date(s).toLocaleDateString(lang==='bn'?'bn-BD':'en-GB',{day:'numeric',month:'long',year:'numeric'});
 
 const DICT={
+'চালু করবেন যেভাবে':'How to get started',
+'অ্যাপ নামান।':'Download the app.',
+'যে ফোনে bKash, Nagad বা Rocket-এর SIM আছে, সেই ফোনে অ্যাপটা ডাউনলোড করে ইনস্টল করুন।':'On the phone that has your bKash, Nagad or Rocket SIM, download and install the app.',
+'key বসান।':'Enter your key.',
+'অ্যাপ খুলে ওপরের key বসান, তারপর SMS-এর অনুমতি দিন।':'Open the app, enter the key above, then allow SMS access.',
+'সাইটে যুক্ত করুন।':'Connect your site.',
+'আপনার সাইট বা বট থেকে নিচের ঠিকানায় পেমেন্ট যাচাই করুন। ডেভেলপার থাকলে তাকে এই ঠিকানা আর key দিন।':'Verify payments from your site or bot at the address below. If you have a developer, give them this address and your key.',
+'ডাউনলোডের লিংক শীঘ্রই এখানে যোগ হবে।':'The download link will be added here soon.',
+'যাচাইয়ের ঠিকানা':'Verification address',
+'ডেভেলপারের জন্য':'For developers',
+'method-এ BKASH, NAGAD বা ROCKET লিখুন। amount ফাঁকা বা ০ দিলে যেকোনো অঙ্ক মিলবে। client_name হলো আপনার সাইটের ডোমেইন, key প্রথম যে ডোমেইনে ব্যবহার হয় সেটার সাথেই বাঁধা পড়ে। সফল হলে status হবে success, আর একই TrxID দ্বিতীয়বার নেবে না।':'Use BKASH, NAGAD or ROCKET as the method. An empty amount or 0 accepts any amount. client_name is your site domain; the key stays tied to the first domain it is used on. On success the status is success, and the same TrxID is never accepted twice.',
 'আমার অর্ডার':'My orders',
 'আমার অর্ডার দেখুন':'View my orders',
 'এখানে আপনার সব অর্ডার আর তার অবস্থা দেখা যাবে।':'All your orders and their status appear here.',
@@ -272,6 +301,8 @@ function applyStatic(){
   $('langBtn').setAttribute('aria-label',L('Switch to Bengali','ইংরেজিতে দেখুন'));
   document.querySelector('.slip[aria-label]').setAttribute('aria-label',L('Sample receipt','নমুনা রসিদ'));
   $('logoutBtn').textContent=L('Sign out','বের হোন');
+  document.querySelectorAll('.gn').forEach((e,i)=>e.textContent=lang==='bn'?'১২৩'[i%3]:String(i%3+1));
+  if($('copyApi')) $('copyApi').textContent=L('Copy','কপি');
   document.querySelectorAll('.step .n').forEach((e,i)=>e.textContent=lang==='bn'?'১২৩'[i]:String(i+1));
 }
 $('langBtn').onclick=()=>{lang=lang==='en'?'bn':'en';try{localStorage.setItem('ph_lang',lang)}catch(e){}
@@ -367,6 +398,7 @@ $('sendOrder').onclick=async()=>{
   }catch(e){bad(e.message);b.disabled=false}
 };
 
+function appHref(u){const m=u.match(/drive\.google\.com\/file\/d\/([\w-]+)/)||u.match(/[?&]id=([\w-]+)/);return u.includes('drive.google.com')&&m?'https://drive.google.com/uc?export=download&id='+m[1]:u}
 async function copyText(v){
   try{await navigator.clipboard.writeText(v);return true}catch(e){
     const t=document.createElement('textarea');t.value=v;t.style.cssText='position:fixed;opacity:0';document.body.appendChild(t);t.select();
@@ -400,7 +432,11 @@ async function loadAccount(){
 }
 async function init(){
   applyStatic();
-  if(APP_URL){$('appLink').href=APP_URL;$('appRow').classList.remove('hide')}
+  const apiBase=SB+'/functions/v1/ph-verify';
+  $('apiUrl').value=apiBase;
+  $('apiSample').textContent='fetch("'+apiBase+'", {\n  method: "POST",\n  headers: {"Content-Type": "application/json"},\n  body: JSON.stringify({\n    license_key: "PH-XXXXXX-XXXXXX",\n    trx_id: "CK7M2X91QA",\n    method: "BKASH",\n    client_name: "yourshop.com",\n    amount: 500\n  })\n})';
+  $('copyApi').onclick=async e=>{const b=e.currentTarget, ok=await copyText(apiBase); b.textContent=ok?L('Copied','কপি হয়েছে'):L('Failed','হয়নি'); setTimeout(()=>b.textContent=L('Copy','কপি'),2000)};
+  if(APP_URL){const h=appHref(APP_URL);$('appLink').href=h;$('appRow').classList.remove('hide');$('guideApp').href=h;$('guideApp').classList.remove('hide');$('guideNoApp').classList.add('hide')}
   try{info=await api('public_info')}catch(e){console.error('public_info failed',e)}
   renderPlans();
   const {data}=await sb.auth.getSession(); session=data.session;
