@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>আমার অর্ডার · PayHook</title>
+<meta name="description" content="bKash, Nagad আর Rocket-এ নিজের নম্বরে টাকা নিন। পেমেন্ট এলে অ্যাপ নিজেই জমা রাখে, TrxID আর টাকার অঙ্ক মিলিয়ে যাচাই করা যায়। মার্চেন্ট অ্যাকাউন্ট লাগে না।">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="bn_BD">
+<meta property="og:title" content="PayHook: bKash, Nagad, Rocket পেমেন্ট যাচাইয়ের অ্যাপ">
+<meta property="og:description" content="bKash, Nagad আর Rocket-এ নিজের নম্বরে টাকা নিন। পেমেন্ট এলে অ্যাপ নিজেই জমা রাখে, TrxID আর টাকার অঙ্ক মিলিয়ে যাচাই করা যায়। মার্চেন্ট অ্যাকাউন্ট লাগে না।">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anek+Bangla:wght@500;800&family=Hind+Siliguri:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-page="myorders">
+<header><div class="wrap">
+  <a class="mark" href="index.html" data-pg="home">Pay<i>Hook</i></a>
+  <nav>
+    <a class="l" href="how.html" data-pg="how">কীভাবে চলে</a><a class="l" href="plans.html" data-pg="plans">প্ল্যান</a><a class="l hide" id="accNav" href="account.html" data-pg="account">অ্যাকাউন্ট</a><a class="l hide" id="ordersNav" href="orders.html" data-pg="myorders">আমার অর্ডার</a><a class="l" href="faq.html" data-pg="faq">প্রশ্ন</a><a class="l" href="contact.html" data-pg="help">যোগাযোগ</a>
+    <button class="btn ghost" id="langBtn" type="button"></button>
+    <button class="btn" id="loginBtn">Google দিয়ে ঢুকুন</button>
+    <button class="btn ghost hide" id="logoutBtn"></button>
+  </nav>
+</div></header>
+
+<main>
+<section class="hide" id="needLogin"><div class="wrap">
+  <h2>লগইন লাগবে</h2>
+  <p class="sub">এই পেজ দেখতে Google দিয়ে লগইন করুন।</p>
+  <button class="btn" id="loginBtn2" type="button"></button>
+</div></section>
+<section id="pageSkel"><div class="wrap"><div class="skel"></div><div class="skel" style="margin-top:14px;min-height:120px"></div></div></section>
+<section class="hide" id="myorders"><div class="wrap">
+  <h2>আমার অর্ডার</h2>
+  <p class="sub" style="color:#ecefe4cc">এখানে আপনার সব অর্ডার আর তার অবস্থা দেখা যাবে।</p>
+  <div class="slip orders"><small>সর্বশেষ ৫০টি</small><div id="orders" data-dyn></div></div>
+</div></section>
+</main>
+<footer><div class="wrap"><span id="contact" data-dyn></span> PayHook ব্যাংক বা পেমেন্ট গেটওয়ে নয়।</div></footer>
+<div id="tabs">
+  <a href="index.html" data-pg="home" id="tHome"></a><a href="how.html" data-pg="how" id="tHow"></a><a href="plans.html" data-pg="plans" id="tPlans"></a><a href="faq.html" data-pg="faq" id="tFaq"></a><a href="contact.html" data-pg="help" id="tHelp"></a><a href="account.html" data-pg="account" id="tAcc"></a>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
