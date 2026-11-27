@@ -172,13 +172,44 @@ header .btn{white-space:nowrap}
     <div style="display:grid;gap:12px;margin:12px 0 16px">
       <div style="display:flex;gap:12px"><span class="gn mono" style="font-weight:700;min-width:18px"></span><div><b>অ্যাপ নামান।</b> যে ফোনে bKash, Nagad বা Rocket-এর SIM আছে, সেই ফোনে অ্যাপটা ডাউনলোড করে ইনস্টল করুন।</div></div>
       <div style="display:flex;gap:12px"><span class="gn mono" style="font-weight:700;min-width:18px"></span><div><b>key বসান।</b> অ্যাপ খুলে ওপরের key বসান, তারপর SMS-এর অনুমতি দিন।</div></div>
-      <div style="display:flex;gap:12px"><span class="gn mono" style="font-weight:700;min-width:18px"></span><div><b>সাইটে যুক্ত করুন।</b> আপনার সাইট বা বট থেকে নিচের ঠিকানায় পেমেন্ট যাচাই করুন। ডেভেলপার থাকলে তাকে এই ঠিকানা আর key দিন।</div></div>
+      <div style="display:flex;gap:12px"><span class="gn mono" style="font-weight:700;min-width:18px"></span><div><b>সেটআপ ফাইল বানান।</b> নিচের ফর্ম পূরণ করলে আপনার বট বা ওয়েবসাইটের জন্য তৈরি ফাইল পাবেন। কোড বোঝা বা বদলানোর দরকার নেই।</div></div>
     </div>
     <a class="btn dark hide" id="guideApp" href="#" rel="noopener">অ্যাপ ডাউনলোড করুন</a>
     <small id="guideNoApp">ডাউনলোডের লিংক শীঘ্রই এখানে যোগ হবে।</small>
-    <label style="margin-top:18px">যাচাইয়ের ঠিকানা</label>
+    
+    <div id="gen" style="margin-top:22px;border-top:1.5px dashed #10231d55;padding-top:18px" data-dyn>
+      <h4 style="margin:0 0 4px;font-size:18px">আপনার সেটআপ ফাইল বানান</h4>
+      <p style="margin:0 0 10px">নিচের তথ্য দিন। আপনার জন্য সব বসানো একটা ফাইল নামবে। তথ্যগুলো শুধু আপনার ফোনের ব্রাউজারে ব্যবহার হয়, আমাদের সার্ভারে পাঠানো হয় না।</p>
+      <label>কোথায় ব্যবহার করবেন?</label>
+      <div style="display:flex;gap:8px;margin-bottom:6px"><button type="button" id="gBot">টেলিগ্রাম বট</button><button type="button" id="gWeb">ওয়েবসাইট</button></div>
+      <label for="gKey">কোন key দিয়ে?</label><select id="gKey"></select>
+      <label for="gProd">পণ্যের নাম</label><input id="gProd" placeholder="যেমন: প্রিমিয়াম কোর্স">
+      <label for="gPrice">দাম (টাকায়)</label><input id="gPrice" inputmode="numeric" placeholder="যেমন: 500">
+      <label for="gBk">bKash নম্বর</label><input id="gBk" inputmode="numeric" placeholder="01XXXXXXXXX">
+      <label for="gNg">Nagad নম্বর (না থাকলে ফাঁকা)</label><input id="gNg" inputmode="numeric" placeholder="01XXXXXXXXX">
+      <label for="gRk">Rocket নম্বর (না থাকলে ফাঁকা)</label><input id="gRk" inputmode="numeric" placeholder="01XXXXXXXXX">
+      <label for="gDeliv">পেমেন্ট সফল হলে ক্রেতা কী পাবে? (লেখা বা লিংক)</label>
+      <textarea id="gDeliv" rows="3" style="width:100%;padding:12px;font:inherit;border:1.5px solid #10231d44;border-radius:3px;background:#fff" placeholder="যেমন: ধন্যবাদ! আপনার কোর্স এখানে: https://..."></textarea>
+      <div id="gBotOnly">
+        <label for="gTok">বটের টোকেন</label><input id="gTok" autocomplete="off" placeholder="123456789:AAH...">
+        <small>@BotFather-এ বট বানালে যে টোকেন দেয় সেটা। এটা গোপন জিনিস, তাই শুধু আপনার ফাইলে বসবে।</small>
+        <label for="gUser">বটের ইউজারনেম</label><input id="gUser" autocomplete="off" placeholder="টোকেন দিলে নিজে বসে যাবে">
+        <label for="gAdmin">আপনার টেলিগ্রাম আইডি (ঐচ্ছিক)</label><input id="gAdmin" inputmode="numeric" placeholder="নতুন পেমেন্টের খবর পেতে চাইলে">
+        <small>আইডি জানতে টেলিগ্রামে @userinfobot-কে /start লিখুন।</small>
+      </div>
+      <div id="gWebOnly" class="hide">
+        <label for="gDom">আপনার সাইটের ডোমেইন</label><input id="gDom" autocomplete="off" placeholder="যেমন: myshop.com">
+        <label for="gLink">সফল হলে কোন লিংকে পাঠাবেন? (ঐচ্ছিক)</label><input id="gLink" placeholder="https://...">
+        <label for="gLinkT">লিংকের বোতামে কী লেখা থাকবে?</label><input id="gLinkT" placeholder="পণ্য নিন">
+      </div>
+      <p style="margin:14px 0 0"><b>সতর্কতা:</b> ফাইলে আপনার key (আর বটের টোকেন) বসানো থাকবে। ফাইলটা কাউকে দেবেন না, GitHub বা কোনো পাবলিক জায়গায় তুলবেন না।</p>
+      <button type="button" class="btn dark" id="gMake" style="margin-top:12px;width:100%">ফাইল বানিয়ে নামান</button>
+      <div class="msg" id="gMsg" role="status"></div>
+      <div id="gDone" class="hide" style="margin-top:12px;border:1.5px solid #2a3fbf;padding:12px 14px;border-radius:3px"></div>
+    </div>
+    <details style="margin-top:22px"><summary style="font-weight:700;cursor:pointer;font-size:16px">নিজে কোড লিখতে চাইলে (ডেভেলপারের জন্য)</summary>
+      <label style="margin-top:18px">যাচাইয়ের ঠিকানা</label>
     <div style="display:flex;gap:10px"><input readonly id="apiUrl" class="mono" style="font-size:13px"><button type="button" class="btn dark" id="copyApi" data-dyn style="padding:8px 16px"></button></div>
-    <details open style="margin-top:18px"><summary style="font-weight:700;cursor:pointer;font-size:17px">নিজের সাইটে গেটওয়ে যুক্ত করবেন যেভাবে</summary>
       <div style="line-height:1.65;margin-top:10px" data-dyn>
         <p>আপনার সাইটে ক্রেতা টাকা পাঠিয়ে TrxID লিখে দিলে, আপনার সাইট আমাদের সার্ভারকে জিজ্ঞেস করবে "এই টাকা এসেছে?" সার্ভার সাথে সাথে উত্তর দেবে। নিচের ধাপগুলো একটা একটা করে করুন।</p>
         <h4 style="margin:18px 0 4px">ধাপ ১: তৈরি রাখুন</h4>
@@ -245,6 +276,346 @@ header .btn{white-space:nowrap}
   <div class="msg" id="dlgMsg" data-dyn role="status"></div>
 </div></dialog>
 
+<script type="text/plain" id="tplBot"># -*- coding: utf-8 -*-
+"""
+PayHook টেলিগ্রাম বট: তৈরি ফাইল
+
+কী করে: ক্রেতা বটে এসে "কিনতে চাই" চাপে, টাকা পাঠিয়ে TrxID লিখে দেয়।
+বট PayHook-কে জিজ্ঞেস করে টাকা এসেছে কিনা। এলে ক্রেতাকে আপনার পণ্য দিয়ে দেয়।
+
+চালানোর আগে (একবার): কমান্ড লাইনে লিখুন   pip install requests
+চালানোর সময়:            python payhook_bot.py
+"""
+import html
+import re
+import time
+
+import requests
+
+# ======== আপনার তথ্য (সব বসানো আছে, কিছু বদলানোর দরকার নেই) ========
+BOT_TOKEN = "%%TOKEN%%"        # @BotFather থেকে পাওয়া বটের টোকেন
+PAYHOOK_KEY = "%%KEY%%"    # PayHook থেকে কেনা আপনার key
+BOT_USERNAME = "%%SITE%%"              # আপনার বটের ইউজারনেম, @ ছাড়া (যেমন quartetflag_dnldr_Bot)
+PRODUCT_NAME = "%%PRODUCT%%"           # যা বিক্রি করছেন তার নাম
+PRICE = %%PRICE%%                         # দাম (টাকায়, শুধু সংখ্যা)
+
+# যে মাধ্যমের নম্বর দেবেন সেটার জায়গায় নম্বর লিখুন। ব্যবহার করবেন না এমনটা ফাঁকা রাখুন ("")
+NUMBERS = {
+    "BKASH": "%%BKASH%%",
+    "NAGAD": "%%NAGAD%%",
+    "ROCKET": "%%ROCKET%%",
+}
+
+# পেমেন্ট সফল হলে ক্রেতা এই লেখাটা পাবে (এখানে ডাউনলোড লিংক, কোড বা যা খুশি দিতে পারেন)
+DELIVERY_TEXT = "%%DELIVERY%%"
+
+# ঐচ্ছিক: নতুন পেমেন্ট হলে আপনাকে জানাতে চাইলে আপনার টেলিগ্রাম আইডি (সংখ্যা) দিন, না চাইলে ফাঁকা রাখুন
+ADMIN_CHAT_ID = "%%ADMIN%%"
+# =======================================================
+
+VERIFY_URL = "https://kzgfugomdgrimrnobeej.supabase.co/functions/v1/ph-verify"
+API = "https://api.telegram.org/bot" + BOT_TOKEN + "/"
+LABEL = {"BKASH": "bKash", "NAGAD": "Nagad", "ROCKET": "Rocket"}
+waiting = {}  # কে কোন মাধ্যমে পাঠাচ্ছে, তার হিসাব
+
+
+def tg(method, **params):
+    try:
+        r = requests.post(API + method, json=params, timeout=40)
+        return r.json()
+    except Exception as e:
+        print("টেলিগ্রামে সংযোগ হয়নি:", e)
+        return {}
+
+
+def say(chat_id, text, buttons=None):
+    p = {"chat_id": chat_id, "text": text, "parse_mode": "HTML", "disable_web_page_preview": True}
+    if buttons:
+        p["reply_markup"] = {"inline_keyboard": buttons}
+    tg("sendMessage", **p)
+
+
+def welcome(chat_id):
+    say(
+        chat_id,
+        "স্বাগতম!\n\n<b>" + html.escape(PRODUCT_NAME) + "</b>\nদাম: ৳" + str(PRICE) + "\n\nকিনতে নিচের বোতাম চাপুন।",
+        [[{"text": "কিনতে চাই", "callback_data": "buy"}]],
+    )
+
+
+def show_methods(chat_id):
+    rows = [[{"text": LABEL[m], "callback_data": "m:" + m}] for m, n in NUMBERS.items() if n]
+    if not rows:
+        say(chat_id, "এখনো পেমেন্টের নম্বর বসানো হয়নি। মালিককে জানান।")
+        return
+    say(chat_id, "কোন মাধ্যমে টাকা পাঠাবেন?", rows)
+
+
+def verify(trx, method):
+    try:
+        r = requests.post(
+            VERIFY_URL,
+            json={
+                "license_key": PAYHOOK_KEY,
+                "client_name": BOT_USERNAME,
+                "trx_id": trx,
+                "method": method,
+                "amount": PRICE,
+            },
+            timeout=20,
+        )
+        return r.json()
+    except Exception:
+        return {"status": "error", "reason": "network"}
+
+
+def handle_trx(chat_id, user, trx):
+    method = waiting.get(chat_id)
+    res = verify(trx, method)
+    if res.get("status") == "success":
+        waiting.pop(chat_id, None)
+        say(chat_id, html.escape(DELIVERY_TEXT, quote=False))
+        if ADMIN_CHAT_ID:
+            name = user.get("first_name", "") + (" @" + user["username"] if user.get("username") else "")
+            say(ADMIN_CHAT_ID, "নতুন পেমেন্ট: ৳" + str(PRICE) + ", " + LABEL.get(method, method) + ", TrxID " + trx + ", " + name)
+        return
+    t = str(res.get("reason", "")).lower()
+    if "not found" in t:
+        say(chat_id, "এই TrxID এখনো পাওয়া যায়নি। ১-২ মিনিট পরে আবার পাঠান। TrxID ভুল হলে ঠিক করে পাঠান।")
+    elif "method does not match" in t:
+        waiting.pop(chat_id, None)
+        say(chat_id, "মনে হচ্ছে আপনি অন্য মাধ্যমে টাকা পাঠিয়েছেন। যেটায় পাঠিয়েছেন সেটা আবার বেছে নিন।")
+        show_methods(chat_id)
+    elif "amount does not match" in t:
+        say(chat_id, "টাকার অঙ্ক মেলেনি। ঠিক ৳" + str(PRICE) + " পাঠাতে হবে।")
+    elif "already used" in t:
+        say(chat_id, "এই TrxID আগেই ব্যবহার হয়ে গেছে।")
+    elif "too many" in t:
+        say(chat_id, "অনেকবার ভুল হয়েছে। কিছুক্ষণ পরে আবার চেষ্টা করুন।")
+    elif "key" in t or "another place" in t:
+        say(chat_id, "বটের সেটিংয়ে সমস্যা আছে। মালিককে জানান।")
+        print("PayHook সমস্যা:", res.get("reason"))
+    else:
+        say(chat_id, "এখন যাচাই করা যাচ্ছে না। একটু পরে আবার চেষ্টা করুন।")
+
+
+def handle(u):
+    cb = u.get("callback_query")
+    if cb:
+        chat_id = cb["message"]["chat"]["id"]
+        tg("answerCallbackQuery", callback_query_id=cb["id"])
+        data = cb.get("data", "")
+        if data == "buy":
+            show_methods(chat_id)
+        elif data.startswith("m:"):
+            method = data[2:]
+            number = NUMBERS.get(method)
+            if not number:
+                return
+            waiting[chat_id] = method
+            say(
+                chat_id,
+                LABEL[method] + " অ্যাপে Send Money করে এই নম্বরে ঠিক <b>৳" + str(PRICE) + "</b> পাঠান:\n\n<code>"
+                + html.escape(number) + "</code>\n(নম্বরে চাপলে কপি হয়ে যাবে)\n\n"
+                "পাঠানোর পর SMS-এ যে TrxID পাবেন, সেটা এখানে লিখে পাঠান।",
+            )
+        return
+
+    m = u.get("message")
+    if not m or "text" not in m:
+        return
+    chat_id = m["chat"]["id"]
+    text = m["text"].strip()
+    if text.startswith("/start") or text.startswith("/buy"):
+        waiting.pop(chat_id, None)
+        welcome(chat_id)
+    elif chat_id in waiting:
+        if re.fullmatch(r"[A-Za-z0-9]{6,20}", text):
+            handle_trx(chat_id, m.get("from", {}), text.upper())
+        else:
+            say(chat_id, "TrxID ঠিক মনে হচ্ছে না। SMS-এ যে কোডটা পেয়েছেন (যেমন CK7M2X91QA) শুধু সেটা লিখে পাঠান।")
+    else:
+        welcome(chat_id)
+
+
+def main():
+    if "XXXXXX" in PAYHOOK_KEY or ":" not in BOT_TOKEN or BOT_TOKEN == "123456:ABC-DEF":
+        print("আগে ফাইলের ওপরের অংশে বটের টোকেন আর PayHook key বদলে নিন।")
+        return
+    tg("deleteWebhook")
+    print("বট চালু হয়েছে। বন্ধ করতে Ctrl + C চাপুন।")
+    offset = 0
+    while True:
+        res = tg("getUpdates", offset=offset, timeout=30)
+        for u in res.get("result", []):
+            offset = u["update_id"] + 1
+            try:
+                handle(u)
+            except Exception as e:
+                print("ভুল:", e)
+        if not res.get("ok"):
+            time.sleep(3)
+
+
+if __name__ == "__main__":
+    main()
+</script>
+<script type="text/plain" id="tplPhp"><?php
+/*
+  PayHook পেমেন্ট পেজ: তৈরি ফাইল (ওয়েবসাইটের জন্য)
+
+  কী করে: ক্রেতা এই পেজে নম্বর দেখে টাকা পাঠায়, TrxID লিখে জমা দেয়।
+  পেজ PayHook-কে জিজ্ঞেস করে টাকা এসেছে কিনা। এলে সফলতার লেখা আর আপনার পণ্যের লিংক দেখায়।
+
+  ব্যবহার: হোস্টিংয়ের File Manager দিয়ে এই ফাইলটা আপনার সাইটের মূল ফোল্ডারে (public_html) তুলুন।
+  তারপর ব্রাউজারে খুলুন:  আপনার-ডোমেইন.com/pay.php
+*/
+
+// ======== আপনার তথ্য (সব বসানো আছে, কিছু বদলানোর দরকার নেই) ========
+$KEY     = '%%KEY%%';   // PayHook থেকে কেনা আপনার key
+$SITE    = '%%SITE%%';         // আপনার সাইটের ডোমেইন (https:// আর www ছাড়া), সবসময় একই লিখবেন
+$PRODUCT = '%%PRODUCT%%';          // যা বিক্রি করছেন তার নাম
+$PRICE   = %%PRICE%%;                  // দাম (টাকায়, শুধু সংখ্যা)
+
+// যে মাধ্যমের নম্বর দেবেন সেটার জায়গায় নম্বর লিখুন। ব্যবহার করবেন না এমনটা ফাঁকা রাখুন ('')
+$NUMBERS = [
+  'BKASH'  => '%%BKASH%%',
+  'NAGAD'  => '%%NAGAD%%',
+  'ROCKET' => '%%ROCKET%%',
+];
+
+// পেমেন্ট সফল হলে ক্রেতা এই লেখা আর লিংক দেখবে
+$SUCCESS_TEXT      = '%%DELIVERY%%';
+$SUCCESS_LINK      = '%%LINK%%';          // ঐচ্ছিক: পণ্য বা ডাউনলোডের লিংক, না থাকলে ফাঁকা রাখুন
+$SUCCESS_LINK_TEXT = '%%LINKTEXT%%';
+// =======================================================
+
+session_start();
+$VERIFY_URL = 'https://kzgfugomdgrimrnobeej.supabase.co/functions/v1/ph-verify';
+$LABEL = ['BKASH' => 'bKash', 'NAGAD' => 'Nagad', 'ROCKET' => 'Rocket'];
+$methods = array_filter($NUMBERS);
+$error = '';
+$notReady = (strpos($KEY, 'XXXXXX') !== false);
+
+function h($s) { return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
+
+function reasonText($reason, $price) {
+  $t = strtolower((string)$reason);
+  if (strpos($t, 'not found') !== false)             return 'এই TrxID এখনো পাওয়া যায়নি। ১-২ মিনিট পরে আবার চেষ্টা করুন। TrxID ভুল হলে ঠিক করে দিন।';
+  if (strpos($t, 'method does not match') !== false) return 'মনে হচ্ছে আপনি অন্য মাধ্যমে টাকা পাঠিয়েছেন। যেটায় পাঠিয়েছেন সেটা বেছে নিন।';
+  if (strpos($t, 'amount does not match') !== false) return 'টাকার অঙ্ক মেলেনি। ঠিক ৳' . $price . ' পাঠাতে হবে।';
+  if (strpos($t, 'already used') !== false)          return 'এই TrxID আগেই ব্যবহার হয়ে গেছে।';
+  if (strpos($t, 'too many') !== false)              return 'অনেকবার ভুল হয়েছে। কিছুক্ষণ পরে আবার চেষ্টা করুন।';
+  if (strpos($t, 'key') !== false || strpos($t, 'another place') !== false) return 'সাইটের সেটিংয়ে সমস্যা আছে। সাইটের মালিককে জানান।';
+  return 'এখন যাচাই করা যাচ্ছে না। একটু পরে আবার চেষ্টা করুন।';
+}
+
+// সফল হওয়ার পর পেজটা রিফ্রেশ করলেও যেন আবার জিজ্ঞেস না করে
+if (isset($_GET['done']) && !empty($_SESSION['payhook_paid'])) {
+  $paid = true;
+} else {
+  $paid = false;
+}
+
+if (!$paid && !$notReady && $_SERVER['REQUEST_METHOD'] === 'POST') {
+  $method = strtoupper(trim($_POST['method'] ?? ''));
+  $trx    = strtoupper(trim($_POST['trx_id'] ?? ''));
+  if (!isset($methods[$method])) {
+    $error = 'কোন মাধ্যমে টাকা পাঠিয়েছেন সেটা বেছে নিন।';
+  } elseif (!preg_match('/^[A-Z0-9]{6,20}$/', $trx)) {
+    $error = 'TrxID ঠিক মনে হচ্ছে না। SMS-এ যে কোডটা পেয়েছেন (যেমন CK7M2X91QA) শুধু সেটা লিখুন।';
+  } else {
+    $ch = curl_init($VERIFY_URL);
+    curl_setopt_array($ch, [
+      CURLOPT_POST           => true,
+      CURLOPT_RETURNTRANSFER => true,
+      CURLOPT_TIMEOUT        => 20,
+      CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
+      CURLOPT_POSTFIELDS     => json_encode([
+        'license_key' => $KEY,
+        'client_name' => $SITE,
+        'trx_id'      => $trx,
+        'method'      => $method,
+        'amount'      => $PRICE,
+      ]),
+    ]);
+    $raw = curl_exec($ch);
+    $res = json_decode((string)$raw, true);
+    if (is_array($res) && ($res['status'] ?? '') === 'success') {
+      $_SESSION['payhook_paid'] = 1;
+      header('Location: ' . strtok($_SERVER['REQUEST_URI'], '?') . '?done=1');
+      exit;
+    }
+    $error = reasonText(is_array($res) ? ($res['reason'] ?? '') : '', $PRICE);
+  }
+}
+?>
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title><?= h($PRODUCT) ?>: পেমেন্ট</title>
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;background:#173a31;color:#10231d;font:17px/1.6 system-ui,'Noto Sans Bengali',sans-serif;padding:24px 16px}
+  .box{max-width:460px;margin:0 auto;background:#ecefe4;padding:22px 20px;border-radius:4px}
+  h1{margin:0 0 4px;font-size:22px}
+  .price{font-size:30px;font-weight:800;margin:4px 0 14px}
+  .m{display:block;border:1.5px solid #10231d44;border-radius:4px;padding:12px;margin-bottom:10px;cursor:pointer}
+  .m input{margin-right:8px}
+  .num{font:600 20px monospace;display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:6px}
+  button,.btn{background:#c9a24b;color:#10231d;border:0;border-radius:4px;padding:10px 16px;font:600 16px system-ui,sans-serif;cursor:pointer;text-decoration:none;display:inline-block}
+  input[type=text]{width:100%;padding:12px;font:500 18px monospace;border:1.5px solid #10231d44;border-radius:4px;background:#fff;margin:6px 0 4px;text-transform:uppercase}
+  .err{background:#a8362a1a;border:1.5px solid #a8362a;color:#7a2118;padding:10px 12px;border-radius:4px;margin:12px 0}
+  .ok{background:#2a3fbf14;border:1.5px solid #2a3fbf;padding:14px;border-radius:4px;margin:12px 0}
+  small{color:#4d6159}
+  .go{width:100%;margin-top:14px}
+</style>
+</head>
+<body>
+<div class="box">
+<?php if ($notReady): ?>
+  <h1>সেটআপ বাকি</h1>
+  <p>ফাইলের ওপরের অংশে নিজের key, সাইটের ডোমেইন আর নম্বর বসিয়ে ফাইলটা আবার আপলোড করুন।</p>
+<?php elseif ($paid): ?>
+  <h1>পেমেন্ট সফল</h1>
+  <div class="ok"><?= nl2br(h($SUCCESS_TEXT)) ?></div>
+  <?php if ($SUCCESS_LINK !== ''): ?><a class="btn" href="<?= h($SUCCESS_LINK) ?>"><?= h($SUCCESS_LINK_TEXT) ?></a><?php endif; ?>
+<?php else: ?>
+  <h1><?= h($PRODUCT) ?></h1>
+  <div class="price">৳ <?= h($PRICE) ?></div>
+  <?php if ($error !== ''): ?><div class="err"><?= h($error) ?></div><?php endif; ?>
+  <form method="post" autocomplete="off">
+    <p><b>ধাপ ১:</b> যে মাধ্যমে টাকা পাঠাবেন সেটা বেছে নিন। তারপর অ্যাপে Send Money করে ঠিক ৳<?= h($PRICE) ?> এই নম্বরে পাঠান।</p>
+    <?php foreach ($methods as $code => $number): ?>
+      <label class="m">
+        <input type="radio" name="method" value="<?= h($code) ?>" <?= (($_POST['method'] ?? '') === $code) ? 'checked' : '' ?> required>
+        <b><?= h($LABEL[$code] ?? $code) ?></b>
+        <span class="num"><span><?= h($number) ?></span><button type="button" class="copy" data-n="<?= h($number) ?>">কপি</button></span>
+      </label>
+    <?php endforeach; ?>
+    <p><b>ধাপ ২:</b> টাকা পাঠানোর পর SMS-এ যে TrxID পাবেন সেটা লিখুন।</p>
+    <input type="text" name="trx_id" placeholder="CK7M2X91QA" value="<?= h($_POST['trx_id'] ?? '') ?>" required>
+    <small>TrxID হলো ৬ থেকে ২০টি অক্ষর বা সংখ্যার কোড।</small>
+    <button class="go" type="submit">পেমেন্ট যাচাই করুন</button>
+  </form>
+<?php endif; ?>
+</div>
+<script>
+document.querySelectorAll('.copy').forEach(function (b) {
+  b.addEventListener('click', function (e) {
+    e.preventDefault();
+    var n = b.getAttribute('data-n');
+    var done = function () { b.textContent = 'কপি হয়েছে'; setTimeout(function () { b.textContent = 'কপি'; }, 2000); };
+    if (navigator.clipboard) { navigator.clipboard.writeText(n).then(done); }
+    else { var t = document.createElement('textarea'); t.value = n; document.body.appendChild(t); t.select(); document.execCommand('copy'); document.body.removeChild(t); done(); }
+  });
+});
+<\/script>
+</body>
+</html>
+</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script>
 // ===== অ্যাপের ডাউনলোড লিংক: Google Drive-এর শেয়ার লিংক এই দুই কোটের মাঝে বসান =====
@@ -455,13 +826,90 @@ function renderAccount(){
     return `<div class="line"><span><b>${esc(x.plan_name)}</b><br><span class="mono">${esc(x.trx_id)}</span>${x.admin_note?'<br><small style="margin:0">'+esc(x.admin_note)+'</small>':''}</span>
     <span class="stamp ${s[1]}" style="position:static;font-size:16px;padding:5px 9px;transform:rotate(-4deg)">${s[0]}</span></div>`}).join('')
     :'<p>'+L('No orders yet. Pick a plan above to get started.','এখনো কোনো অর্ডার নেই। উপরের প্ল্যান থেকে শুরু করুন।')+'</p>';
+  fillGenKeys();
 }
 async function loadAccount(){
   const [k,o]=await Promise.all([api('my_keys'),api('my_orders')]);
   acct={keys:k.keys,orders:o.orders}; renderAccount();
 }
+
+// ===== সেটআপ ফাইল বানানো: সব কাজ ব্রাউজারেই হয়, কিছু আমাদের সার্ভারে যায় না =====
+const gEn=t=>String(t||'').replace(/[০-৯]/g,c=>'০১২৩৪৫৬৭৮৯'.indexOf(c));
+const pyStr=t=>t.replace(/\\/g,'\\\\').replace(/"/g,'\\"').replace(/\r?\n/g,'\\n');
+const phpStr=t=>t.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\r/g,'');
+const tplText=id=>$(id).textContent.split('<\\/script>').join('<'+'/script>');
+let genType='bot';
+function fillGenKeys(){
+  const sel=$('gKey'); if(!sel||!acct) return;
+  sel.innerHTML=acct.keys.length?acct.keys.map(x=>`<option value="${esc(x.key)}">${esc(x.key)}</option>`).join(''):'<option value="">এখনো কোনো key নেই</option>';
+}
+function setGenType(t){
+  genType=t;
+  $('gBotOnly').classList.toggle('hide',t!=='bot'); $('gWebOnly').classList.toggle('hide',t!=='web');
+  for(const [id,k] of [['gBot','bot'],['gWeb','web']]){
+    const on=k===t; $(id).className='btn'+(on?' dark':'');
+    $(id).style.cssText=on?'padding:8px 16px':'padding:8px 16px;background:transparent;box-shadow:inset 0 0 0 1.5px var(--ink);color:var(--ink)';
+  }
+  $('gDone').classList.add('hide'); $('gMsg').textContent='';
+}
+function downloadText(name,text){
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([text],{type:'text/plain;charset=utf-8'})); a.download=name;
+  document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1500);
+}
+function makeSetupFile(){
+  const m=$('gMsg'); m.className='msg'; m.textContent='';
+  const bad=t=>{m.className='msg err';m.textContent=t};
+  const key=$('gKey').value; if(!key) return bad('আগে একটা key লাগবে। অর্ডার অনুমোদন হলে key এখানে আসবে।');
+  const prod=$('gProd').value.trim(); if(!prod) return bad('পণ্যের নাম লিখুন।');
+  const price=parseFloat(gEn($('gPrice').value)); if(!(price>0)) return bad('দাম লিখুন (শুধু সংখ্যা)।');
+  const nums={}; let any=false;
+  for(const [id,k,nm] of [['gBk','BKASH','bKash'],['gNg','NAGAD','Nagad'],['gRk','ROCKET','Rocket']]){
+    const v=gEn($(id).value).replace(/[\s-]/g,'').replace(/^\+?880/,'0');
+    if(v&&!/^01[3-9]\d{8}$/.test(v)) return bad(nm+' নম্বরটা ঠিক নয়। ১১ সংখ্যায় লিখুন, যেমন 01XXXXXXXXX।');
+    nums[k]=v; if(v) any=true;
+  }
+  if(!any) return bad('অন্তত একটা মাধ্যমের নম্বর দিন।');
+  const deliv=$('gDeliv').value.trim()||'ধন্যবাদ! আপনার পেমেন্ট সফল হয়েছে।';
+  let out, name, vals;
+  if(genType==='bot'){
+    const tok=$('gTok').value.trim(); if(!/^\d{5,}:[A-Za-z0-9_-]{30,}$/.test(tok)) return bad('বটের টোকেন ঠিক মনে হচ্ছে না। @BotFather থেকে পাওয়া পুরো টোকেনটা বসান।');
+    const user=$('gUser').value.trim().replace(/^@/,'').replace(/^https?:\/\/t\.me\//,'');
+    if(!/^[A-Za-z0-9_]{5,32}$/.test(user)) return bad('বটের ইউজারনেম লিখুন (@ ছাড়া)।');
+    const admin=gEn($('gAdmin').value).trim(); if(admin&&!/^\d{5,15}$/.test(admin)) return bad('টেলিগ্রাম আইডি শুধু সংখ্যা হবে।');
+    vals={TOKEN:tok,KEY:key,SITE:user,PRODUCT:pyStr(prod),PRICE:String(price),BKASH:nums.BKASH,NAGAD:nums.NAGAD,ROCKET:nums.ROCKET,DELIVERY:pyStr(deliv),ADMIN:admin};
+    out=tplText('tplBot'); name='payhook_bot.py';
+  }else{
+    const dom=$('gDom').value.trim().toLowerCase().replace(/^https?:\/\//,'').replace(/^www\./,'').split('/')[0];
+    if(!/^[a-z0-9.-]+\.[a-z]{2,}$/.test(dom)) return bad('সাইটের ডোমেইন লিখুন, যেমন myshop.com।');
+    const link=$('gLink').value.trim(); if(link&&!/^https?:\/\//.test(link)) return bad('লিংক https:// দিয়ে শুরু হতে হবে।');
+    vals={KEY:key,SITE:dom,PRODUCT:phpStr(prod),PRICE:String(price),BKASH:nums.BKASH,NAGAD:nums.NAGAD,ROCKET:nums.ROCKET,DELIVERY:phpStr(deliv),LINK:phpStr(link),LINKTEXT:phpStr($('gLinkT').value.trim()||'পণ্য নিন')};
+    out=tplText('tplPhp'); name='pay.php';
+  }
+  for(const [k,v] of Object.entries(vals)) out=out.split('%%'+k+'%%').join(v);
+  downloadText(name,out);
+  m.className='msg ok'; m.textContent='ফাইল তৈরি হয়েছে ('+name+')। নিচের ধাপগুলো করুন।';
+  const d=$('gDone'); d.classList.remove('hide');
+  d.innerHTML=genType==='bot'
+    ?'<b>এবার যা করবেন:</b><ol style="margin:6px 0 0 20px;line-height:1.7"><li>নামানো <b>payhook_bot.py</b> ফাইলটা যেখানে আপনার বট চালান সেখানে রাখুন।</li><li>একবার চালান: <span class="mono">pip install requests</span></li><li>তারপর চালান: <span class="mono">python payhook_bot.py</span></li><li>টেলিগ্রামে বটে /start লিখে দেখুন।</li></ol><p style="margin:8px 0 0">এটা নতুন বটের জন্য। আগে থেকে চলা বটে চালালে সেটার পুরনো কাজ বন্ধ হয়ে যাবে।</p>'
+    :'<b>এবার যা করবেন:</b><ol style="margin:6px 0 0 20px;line-height:1.7"><li>হোস্টিংয়ের File Manager খুলে <b>public_html</b> ফোল্ডারে যান।</li><li>Upload চেপে নামানো <b>pay.php</b> ফাইলটা তুলুন।</li><li>ব্রাউজারে খুলুন: <b>'+esc(vals.SITE)+'/pay.php</b></li></ol><p style="margin:8px 0 0">এটা PHP চলে এমন হোস্টিংয়ে কাজ করে। শুধু HTML-এর সাইটে (যেমন GitHub Pages) কাজ করবে না।</p>';
+}
+function setupGen(){
+  setGenType('bot');
+  $('gBot').onclick=()=>setGenType('bot'); $('gWeb').onclick=()=>setGenType('web');
+  $('gMake').onclick=makeSetupFile;
+  let tm; $('gTok').oninput=()=>{
+    clearTimeout(tm); const t=$('gTok').value.trim();
+    if(!/^\d{5,}:[A-Za-z0-9_-]{30,}$/.test(t)) return;
+    tm=setTimeout(async()=>{try{
+      const r=await (await fetch('https://api.telegram.org/bot'+t+'/getMe')).json();
+      if(r.ok&&r.result&&r.result.username){$('gUser').value=r.result.username;$('gMsg').className='msg ok';$('gMsg').textContent='বট পাওয়া গেছে: @'+r.result.username}
+      else{$('gMsg').className='msg err';$('gMsg').textContent='এই টোকেন Telegram চিনছে না। আবার দেখে বসান।'}
+    }catch(e){}},500)};
+}
 async function init(){
   applyStatic();
+  setupGen();
   const apiBase=SB+'/functions/v1/ph-verify';
   $('apiUrl').value=apiBase;
   const CODE={
